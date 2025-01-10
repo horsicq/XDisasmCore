@@ -24,14 +24,12 @@
 
 #include <QObject>
 
-class XDisasmCore : public QObject
-{
+class XDisasmCore : public QObject {
     Q_OBJECT
 public:
     explicit XDisasmCore(QObject *pParent = nullptr);
 
 signals:
-
 };
 
-#endif // XDISASMCORE_H
+#endif  // XDISASMCORE_H
