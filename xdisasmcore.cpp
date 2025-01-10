@@ -21,8 +21,6 @@
 
 #include "xdisasmcore.h"
 
-XDisasmCore::XDisasmCore(QObject *pParent)
-    : QObject(pParent)
+XDisasmCore::XDisasmCore(QObject *pParent) : QObject(pParent)
 {
-
 }
