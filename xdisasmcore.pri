@@ -1,10 +1,14 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
+INCLUDEPATH += $$PWD/Modules
+DEPENDPATH += $$PWD/Modules
 
 HEADERS += \
+    $$PWD/Modules/x7zip_properties.h \
     $$PWD/xdisasmcore.h
 
 SOURCES += \
+    $$PWD/Modules/x7zip_properties.cpp \
     $$PWD/xdisasmcore.cpp
 
 !contains(XCONFIG, xbinary) {

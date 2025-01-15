@@ -1,4 +1,5 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/Modules)
 
 if (NOT DEFINED XBINARY_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../Formats/xbinary.cmake)
@@ -11,6 +12,8 @@ endif()
 
 set(XDISASMCORE_SOURCES
     ${XDISASMCORE_SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/Modules/x7zip_properties.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Modules/x7zip_properties.h
     ${CMAKE_CURRENT_LIST_DIR}/xdisasmcore.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xdisasmcore.h
 )
