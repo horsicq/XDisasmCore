@@ -23,6 +23,9 @@
 #define XDISASMCORE_H
 
 #include "xcapstone.h"
+#include "xdisasmabstract.h"
+#include "Modules/capstone_bridge.h"
+#include "Modules/x7zip_properties.h"
 
 #ifdef QT_GUI_LIB
 #include <QColor>
@@ -36,46 +39,6 @@ public:
         ST_FULL,
         ST_MASK,
         ST_REL
-    };
-
-    enum RELTYPE {
-        RELTYPE_NONE = 0,
-        RELTYPE_ALL,
-        RELTYPE_JMP = 0x10,
-        RELTYPE_JMP_UNCOND,
-        RELTYPE_JMP_COND,
-        RELTYPE_CALL = 0x20
-    };
-
-    enum MEMTYPE {
-        MEMTYPE_NONE = 0,
-        MEMTYPE_READ,
-        MEMTYPE_WRITE,
-        MEMTYPE_ACCESS
-    };
-
-    struct DISASM_RESULT {
-        bool bIsValid;
-        XADDR nAddress;
-        qint32 nSize;
-        quint32 nOpcode;
-        QString sMnemonic;
-        QString sString;
-        RELTYPE relType;
-        XADDR nXrefToRelative;
-        MEMTYPE memType;
-        XADDR nXrefToMemory;
-        qint32 nMemorySize;
-        XADDR nNextAddress;
-        bool bIsConst;  // For signatures
-        quint32 nDispOffset;
-        quint32 nDispSize;
-        quint32 nImmOffset;
-        quint32 nImmSize;
-    };
-
-    struct DISASM_OPTIONS {
-        bool bIsUppercase;
     };
 
     struct SIGNATURE_RECORD {
@@ -128,10 +91,10 @@ public:
 
     void setMode(XBinary::DM disasmMode, XBinary::SYNTAX syntax = XBinary::SYNTAX_DEFAULT);
 
-    DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions);
-    DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const DISASM_OPTIONS &disasmOptions);
+    XDisasmAbstract::DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    XDisasmAbstract::DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 
-    QString getNumberString(qint64 nNumber);
+    QList<XDisasmAbstract::DISASM_RESULT> disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit = -1, XBinary::PDSTRUCT *pPdStruct = 0);
 
     XBinary::SYNTAX getSyntax();
 
@@ -140,13 +103,14 @@ public:
                                                                   ST signatureType);
     static QString replaceWildChar(const QString &sString, qint32 nOffset, qint32 nSize, QChar cWild);  // Move to XBinary
 
+    QString getNumberString(qint64 nValue);
+
 private:
     XBinary::DM g_disasmMode;
     XBinary::DMFAMILY g_disasmFamily;
     XBinary::SYNTAX g_syntax;
-    bool g_bIsCapstone;
-    csh g_handle;
     qint32 g_nOpcodeSize;
+    XDisasmAbstract *g_pDisasmAbstract;
 };
 
 #endif  // XDISASMCORE_H

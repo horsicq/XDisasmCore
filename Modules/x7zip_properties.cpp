@@ -22,7 +22,48 @@
 #include "x7zip_properties.h"
 
 X7Zip_Properties::X7Zip_Properties(QObject *parent)
-    : QObject{parent}
+    : XDisasmAbstract(parent)
 {
 
+}
+
+QList<XDisasmAbstract::DISASM_RESULT> X7Zip_Properties::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
+{
+    QList<XDisasmAbstract::DISASM_RESULT> listResult;
+
+    qint32 nCount = 0;
+    qint32 nCurrentSize = 0;
+
+    while ((nCurrentSize < nDataSize) && (!(pPdStruct->bIsStop)))  {
+        XDisasmAbstract::DISASM_RESULT result = {};
+        result.nAddress = nAddress;
+        result.sMnemonic = "TEST";
+        result.nSize = 1;
+        result.bIsValid = true;
+
+        if (disasmOptions.bIsUppercase) {
+            result.sMnemonic = result.sMnemonic.toUpper();
+            result.sString = result.sString.toUpper();
+        }
+
+        listResult.append(result);
+
+        nCount++;
+
+        if (nLimit > 0) {
+            if (nCount > nLimit) {
+                break;
+            }
+        } else if (nLimit == 0) {
+            if (!result.bIsValid) {
+                break;
+            }
+        }
+
+        pData += result.nSize;
+        nAddress += result.nSize;
+        nCurrentSize += result.nSize;
+    }
+
+    return listResult;
 }

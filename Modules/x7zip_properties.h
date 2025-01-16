@@ -22,16 +22,16 @@
 #ifndef X7ZIP_PROPERTIES_H
 #define X7ZIP_PROPERTIES_H
 
-#include <QObject>
+#include "../xdisasmabstract.h"
+#include "xsevenzip.h"
 
-class X7Zip_Properties : public QObject
+class X7Zip_Properties : public XDisasmAbstract
 {
     Q_OBJECT
 public:
     explicit X7Zip_Properties(QObject *parent = nullptr);
 
-signals:
-
+    virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct);
 };
 
 #endif // X7ZIP_PROPERTIES_H
