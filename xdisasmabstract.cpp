@@ -63,3 +63,41 @@ QString XDisasmAbstract::getOpcodeFullString(const DISASM_RESULT &disasmResult)
 
     return sResult;
 }
+
+void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, DISASM_RESULT &disasmResult, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
+{
+    if (pState->nLimit == 0) {
+        if (!disasmResult.bIsValid) {
+            pState->bIsStop = true;
+        }
+    }
+
+    if (!(pState->bIsStop)) {
+        if (disasmOptions.bIsUppercase) {
+            disasmResult.sMnemonic = disasmResult.sMnemonic.toUpper();
+            disasmResult.sString = disasmResult.sString.toUpper();
+        }
+
+        pListResults->append(disasmResult);
+        pState->nCurrentCount++;
+        pState->nCurrentOffset += disasmResult.nSize;
+    }
+
+    if ((pState->nLimit > 0) && (pState->nCurrentCount > pState->nLimit)) {
+        pState->bIsStop = true;
+    } else if (pState->nCurrentOffset >= pState->nMaxSize) {
+        pState->bIsStop = true;
+    }
+}
+
+void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
+{
+    DISASM_RESULT disasmResult = {};
+    disasmResult.bIsValid = true;
+    disasmResult.nAddress = nAddress;
+    disasmResult.nSize = nSize;
+    disasmResult.sMnemonic = sMnemonic;
+    disasmResult.sString = sString;
+
+    _addDisasmResult(pListResults, disasmResult, pState, disasmOptions);
+}

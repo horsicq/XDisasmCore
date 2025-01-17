@@ -27,7 +27,17 @@
 class XDisasmAbstract : public QObject
 {
     Q_OBJECT
+
 public:
+    struct STATE {
+        bool bIsStop;
+        XADDR nAddress;
+        qint32 nLimit;
+        qint64 nMaxSize;
+        qint32 nCurrentCount;
+        qint64 nCurrentOffset;
+    };
+
     enum RELTYPE {
         RELTYPE_NONE = 0,
         RELTYPE_ALL,
@@ -73,8 +83,9 @@ public:
 
     static QString getNumberString(qint64 nValue, XBinary::DM disasmMode, XBinary::SYNTAX syntax);
     static QString getOpcodeFullString(const DISASM_RESULT &disasmResult);
-signals:
 
+    void _addDisasmResult(QList<DISASM_RESULT> *pListResults, DISASM_RESULT &disasmResult, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    void _addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 };
 
 #endif // XDISASMABSTRACT_H

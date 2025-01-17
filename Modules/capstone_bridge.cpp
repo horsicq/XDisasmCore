@@ -42,10 +42,14 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
 {
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
-    qint32 nCount = 0;
-    qint32 nCurrentSize = 0;
+    STATE state = {};
+    state.nCurrentCount = 0;
+    state.nCurrentOffset = 0;
+    state.nLimit = nLimit;
+    state.nMaxSize = nDataSize;
+    state.nAddress = nAddress;
 
-    while ((nCurrentSize < nDataSize) && (!(pPdStruct->bIsStop)))  {
+    while ((!(pPdStruct->bIsStop)) && (!(state.bIsStop))){
         XDisasmAbstract::DISASM_RESULT result = {};
         result.nAddress = nAddress;
 
@@ -203,28 +207,10 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
             }
         }
 
-        if (disasmOptions.bIsUppercase) {
-            result.sMnemonic = result.sMnemonic.toUpper();
-            result.sString = result.sString.toUpper();
-        }
-
-        listResult.append(result);
-
-        nCount++;
-
-        if (nLimit > 0) {
-            if (nCount > nLimit) {
-                break;
-            }
-        } else if (nLimit == 0) {
-            if (!result.bIsValid) {
-                break;
-            }
-        }
+        _addDisasmResult(&listResult, result, &state, disasmOptions);
 
         pData += result.nSize;
         nAddress += result.nSize;
-        nCurrentSize += result.nSize;
     }
 
     return listResult;

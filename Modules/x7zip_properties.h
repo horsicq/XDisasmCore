@@ -32,6 +32,14 @@ public:
     explicit X7Zip_Properties(QObject *parent = nullptr);
 
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct);
+
+private:
+    void _addTagId(QList<DISASM_RESULT> *pListResults, quint64 nValue, XSevenZip::EIdEnum id, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    void _handleTag(QList<DISASM_RESULT> *pListResults, char *pData, XSevenZip::EIdEnum id, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    quint64 _handleNumber(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    quint8 _handleByte(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    quint32 _handleUINT32(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    QByteArray _handleArray(QList<DISASM_RESULT> *pListResults, char *pData, qint32 nDataSize, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 };
 
 #endif // X7ZIP_PROPERTIES_H
