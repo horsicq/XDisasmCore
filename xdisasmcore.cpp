@@ -23,7 +23,7 @@
 
 XDisasmCore::XDisasmCore(QObject *pParent) : QObject(pParent)
 {
-    g_disasmMode=XBinary::DM_UNKNOWN;
+    g_disasmMode = XBinary::DM_UNKNOWN;
     g_disasmFamily = XBinary::DMFAMILY_UNKNOWN;
     g_pDisasmAbstract = nullptr;
     g_nOpcodeSize = 15;
@@ -33,7 +33,7 @@ XDisasmCore::~XDisasmCore()
 {
     if (g_pDisasmAbstract) {
         delete g_pDisasmAbstract;
-        //XCapstone::closeHandle(&g_handle);
+        // XCapstone::closeHandle(&g_handle);
     }
 }
 
@@ -140,7 +140,8 @@ QString XDisasmCore::getSignature(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMem
     return sResult;
 }
 
-QList<XDisasmCore::SIGNATURE_RECORD> XDisasmCore::getSignatureRecords(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint32 nCount, ST signatureType)
+QList<XDisasmCore::SIGNATURE_RECORD> XDisasmCore::getSignatureRecords(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint32 nCount,
+                                                                      ST signatureType)
 {
     QList<SIGNATURE_RECORD> listResult;
 
@@ -228,7 +229,8 @@ XDisasmAbstract::DISASM_RESULT XDisasmCore::disAsm(QIODevice *pDevice, qint64 nO
     return disAsm(baData.data(), baData.size(), nAddress, disasmOptions);
 }
 
-QList<XDisasmAbstract::DISASM_RESULT> XDisasmCore::disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
+QList<XDisasmAbstract::DISASM_RESULT> XDisasmCore::disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions,
+                                                              qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
 {
     XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

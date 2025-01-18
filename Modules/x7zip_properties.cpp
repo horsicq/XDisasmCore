@@ -21,10 +21,8 @@
 
 #include "x7zip_properties.h"
 
-X7Zip_Properties::X7Zip_Properties(QObject *parent)
-    : XDisasmAbstract(parent)
+X7Zip_Properties::X7Zip_Properties(QObject *parent) : XDisasmAbstract(parent)
 {
-
 }
 
 void X7Zip_Properties::_addTagId(QList<DISASM_RESULT> *pListResults, quint64 nValue, XSevenZip::EIdEnum id, STATE *pState, const DISASM_OPTIONS &disasmOptions)
@@ -51,10 +49,10 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
     if (puTag.bIsValid) {
         if (id == puTag.nValue) {
             _addTagId(pListResults, puTag.nValue, id, pState, disasmOptions);
-            if (puTag.nValue == XSevenZip::k7zIdHeader){
+            if (puTag.nValue == XSevenZip::k7zIdHeader) {
                 _handleTag(pListResults, pData, XSevenZip::k7zIdMainStreamsInfo, pState, disasmOptions);
                 _handleTag(pListResults, pData, XSevenZip::k7zIdFilesInfo, pState, disasmOptions);
-            } else if (puTag.nValue == XSevenZip::k7zIdMainStreamsInfo){
+            } else if (puTag.nValue == XSevenZip::k7zIdMainStreamsInfo) {
                 _handleTag(pListResults, pData, XSevenZip::k7zIdPackInfo, pState, disasmOptions);
                 _handleTag(pListResults, pData, XSevenZip::k7zIdUnpackInfo, pState, disasmOptions);
                 XBinary::PACKED_UINT puExtra = XBinary::_read_packedNumber(pData + pState->nCurrentOffset, pState->nMaxSize - pState->nCurrentOffset);
@@ -64,18 +62,18 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                     }
                 }
                 _handleTag(pListResults, pData, XSevenZip::k7zIdEnd, pState, disasmOptions);
-            } else if (puTag.nValue == XSevenZip::k7zIdEncodedHeader){
+            } else if (puTag.nValue == XSevenZip::k7zIdEncodedHeader) {
                 _handleTag(pListResults, pData, XSevenZip::k7zIdPackInfo, pState, disasmOptions);
                 _handleTag(pListResults, pData, XSevenZip::k7zIdUnpackInfo, pState, disasmOptions);
                 _handleTag(pListResults, pData, XSevenZip::k7zIdEnd, pState, disasmOptions);
             } else if (puTag.nValue == XSevenZip::k7zIdPackInfo) {
-                _handleNumber(pListResults, pData, pState, disasmOptions); // Pack Position
-                quint64 nCount = _handleNumber(pListResults, pData, pState, disasmOptions); // Count of Pack Streams, NUMBER
+                _handleNumber(pListResults, pData, pState, disasmOptions);                   // Pack Position
+                quint64 nCount = _handleNumber(pListResults, pData, pState, disasmOptions);  // Count of Pack Streams, NUMBER
                 for (quint64 i = 0; (i < nCount) && (!(pState->bIsStop)); i++) {
-                    _handleNumber(pListResults, pData, pState, disasmOptions); // Size
+                    _handleNumber(pListResults, pData, pState, disasmOptions);  // Size
                 }
                 for (quint64 i = 0; (i < nCount) && (!(pState->bIsStop)); i++) {
-                    _handleNumber(pListResults, pData, pState, disasmOptions); // CRC
+                    _handleNumber(pListResults, pData, pState, disasmOptions);  // CRC
                 }
                 _handleTag(pListResults, pData, XSevenZip::k7zIdEnd, pState, disasmOptions);
             } else if (puTag.nValue == XSevenZip::k7zIdUnpackInfo) {
@@ -88,9 +86,9 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                         if (puExtra.nValue == XSevenZip::k7zIdCRC) {
                             // TODO mb create a new if
                             _addTagId(pListResults, puExtra.nValue, XSevenZip::k7zIdCRC, pState, disasmOptions);
-                            quint64 nCRCCount = _handleNumber(pListResults, pData, pState, disasmOptions); // Count of CRC
+                            quint64 nCRCCount = _handleNumber(pListResults, pData, pState, disasmOptions);  // Count of CRC
                             for (quint64 i = 0; (i < nCRCCount) && (!(pState->bIsStop)); i++) {
-                                _handleUINT32(pListResults, pData, pState, disasmOptions); // UnpackDigest, UINT32
+                                _handleUINT32(pListResults, pData, pState, disasmOptions);  // UnpackDigest, UINT32
                             }
                         } else {
                             break;
@@ -101,13 +99,13 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                 }
                 _handleTag(pListResults, pData, XSevenZip::k7zIdEnd, pState, disasmOptions);
             } else if (puTag.nValue == XSevenZip::k7zIdFilesInfo) {
-                quint64 nNumberOfFiles = _handleNumber(pListResults, pData, pState, disasmOptions); // Number of Files
+                quint64 nNumberOfFiles = _handleNumber(pListResults, pData, pState, disasmOptions);  // Number of Files
             } else if (puTag.nValue == XSevenZip::k7zIdFolder) {
-                quint64 nNumberOfFolders = _handleNumber(pListResults, pData, pState, disasmOptions); // Number of Folders
-                quint8 nExt = _handleByte(pListResults, pData, pState, disasmOptions); // External
+                quint64 nNumberOfFolders = _handleNumber(pListResults, pData, pState, disasmOptions);  // Number of Folders
+                quint8 nExt = _handleByte(pListResults, pData, pState, disasmOptions);                 // External
                 if (nExt == 0) {
-                    _handleNumber(pListResults, pData, pState, disasmOptions); // Number of Coders, NUMBER
-                    quint8 nFlag = _handleByte(pListResults, pData, pState, disasmOptions); // Flag
+                    _handleNumber(pListResults, pData, pState, disasmOptions);               // Number of Coders, NUMBER
+                    quint8 nFlag = _handleByte(pListResults, pData, pState, disasmOptions);  // Flag
                     qint32 nCodecSize = nFlag & 0x0F;
                     bool bIsComplex = (nFlag & 0x10) != 0;
                     bool bHasAttr = (nFlag & 0x20) != 0;
@@ -116,11 +114,11 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                         // TODO
                     }
                     if (bHasAttr) {
-                        quint64 nPropertySize = _handleNumber(pListResults, pData, pState, disasmOptions); //PropertiesSize
+                        quint64 nPropertySize = _handleNumber(pListResults, pData, pState, disasmOptions);  // PropertiesSize
                         _handleArray(pListResults, pData, nPropertySize, pState, disasmOptions);
                     }
                 } else if (nExt == 1) {
-                    _handleNumber(pListResults, pData, pState, disasmOptions); // Data Stream Index, NUMBER
+                    _handleNumber(pListResults, pData, pState, disasmOptions);  // Data Stream Index, NUMBER
                 }
 
                 while (!(pState->bIsStop)) {
@@ -129,13 +127,13 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                         if (puExtra.nValue == XSevenZip::k7zIdCodersUnpackSize) {
                             _addTagId(pListResults, puExtra.nValue, XSevenZip::k7zIdCodersUnpackSize, pState, disasmOptions);
                             for (quint64 i = 0; (i < nNumberOfFolders) && (!(pState->bIsStop)); i++) {
-                                _handleNumber(pListResults, pData, pState, disasmOptions); // Unpacksize, NUMBER
+                                _handleNumber(pListResults, pData, pState, disasmOptions);  // Unpacksize, NUMBER
                             }
                         } else if (puExtra.nValue == XSevenZip::k7zIdCRC) {
                             _addTagId(pListResults, puExtra.nValue, XSevenZip::k7zIdCRC, pState, disasmOptions);
-                            quint64 nCRCCount = _handleNumber(pListResults, pData, pState, disasmOptions); // Count of CRC
+                            quint64 nCRCCount = _handleNumber(pListResults, pData, pState, disasmOptions);  // Count of CRC
                             for (quint64 i = 0; (i < nCRCCount) && (!(pState->bIsStop)); i++) {
-                                _handleUINT32(pListResults, pData, pState, disasmOptions); // UnpackDigest, UINT32
+                                _handleUINT32(pListResults, pData, pState, disasmOptions);  // UnpackDigest, UINT32
                             }
                         } else {
                             break;
@@ -165,7 +163,8 @@ quint64 X7Zip_Properties::_handleNumber(QList<DISASM_RESULT> *pListResults, char
 
     if (puTag.bIsValid) {
         nResult = puTag.nValue;
-        _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, puTag.nByteSize, "NUMBER", QString("0x%1").arg(QString::number(puTag.nValue, 16)), pState, disasmOptions);
+        _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, puTag.nByteSize, "NUMBER", QString("0x%1").arg(QString::number(puTag.nValue, 16)),
+                         pState, disasmOptions);
     } else {
         pState->bIsStop = true;
     }
@@ -230,7 +229,8 @@ QByteArray X7Zip_Properties::_handleArray(QList<DISASM_RESULT> *pListResults, ch
     return baResult;
 }
 
-QList<XDisasmAbstract::DISASM_RESULT> X7Zip_Properties::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
+QList<XDisasmAbstract::DISASM_RESULT> X7Zip_Properties::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit,
+                                                                XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 

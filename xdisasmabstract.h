@@ -24,8 +24,7 @@
 
 #include "xbinary.h"
 
-class XDisasmAbstract : public QObject
-{
+class XDisasmAbstract : public QObject {
     Q_OBJECT
 
 public:
@@ -79,13 +78,15 @@ public:
     };
 
     explicit XDisasmAbstract(QObject *parent = nullptr);
-    virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct) = 0;
+    virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,
+                                         XBinary::PDSTRUCT *pPdStruct) = 0;
 
     static QString getNumberString(qint64 nValue, XBinary::DM disasmMode, XBinary::SYNTAX syntax);
     static QString getOpcodeFullString(const DISASM_RESULT &disasmResult);
 
     void _addDisasmResult(QList<DISASM_RESULT> *pListResults, DISASM_RESULT &disasmResult, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
-    void _addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    void _addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState,
+                          const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 };
 
-#endif // XDISASMABSTRACT_H
+#endif  // XDISASMABSTRACT_H

@@ -21,10 +21,8 @@
 
 #include "xdisasmabstract.h"
 
-XDisasmAbstract::XDisasmAbstract(QObject *parent)
-    : QObject(parent)
+XDisasmAbstract::XDisasmAbstract(QObject *parent) : QObject(parent)
 {
-
 }
 
 QString XDisasmAbstract::getNumberString(qint64 nValue, XBinary::DM disasmMode, XBinary::SYNTAX syntax)
@@ -64,7 +62,8 @@ QString XDisasmAbstract::getOpcodeFullString(const DISASM_RESULT &disasmResult)
     return sResult;
 }
 
-void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, DISASM_RESULT &disasmResult, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
+void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, DISASM_RESULT &disasmResult, STATE *pState,
+                                       const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
 {
     if (pState->nLimit == 0) {
         if (!disasmResult.bIsValid) {
@@ -90,7 +89,8 @@ void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, DISAS
     }
 }
 
-void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
+void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState,
+                                       const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
 {
     DISASM_RESULT disasmResult = {};
     disasmResult.bIsValid = true;

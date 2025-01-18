@@ -94,13 +94,13 @@ public:
     XDisasmAbstract::DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     XDisasmAbstract::DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 
-    QList<XDisasmAbstract::DISASM_RESULT> disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit = -1, XBinary::PDSTRUCT *pPdStruct = 0);
+    QList<XDisasmAbstract::DISASM_RESULT> disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions,
+                                                     qint32 nLimit = -1, XBinary::PDSTRUCT *pPdStruct = 0);
 
     XBinary::SYNTAX getSyntax();
 
     QString getSignature(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress, ST signatureType, qint32 nCount);
-    QList<XDisasmCore::SIGNATURE_RECORD> getSignatureRecords(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint32 nCount,
-                                                                  ST signatureType);
+    QList<XDisasmCore::SIGNATURE_RECORD> getSignatureRecords(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint32 nCount, ST signatureType);
     static QString replaceWildChar(const QString &sString, qint32 nOffset, qint32 nSize, QChar cWild);  // Move to XBinary
 
     QString getNumberString(qint64 nValue);

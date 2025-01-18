@@ -21,8 +21,7 @@
 
 #include "capstone_bridge.h"
 
-Capstone_Bridge::Capstone_Bridge(XBinary::DM disasmMode, XBinary::SYNTAX syntax, QObject *parent)
-    : XDisasmAbstract(parent)
+Capstone_Bridge::Capstone_Bridge(XBinary::DM disasmMode, XBinary::SYNTAX syntax, QObject *parent) : XDisasmAbstract(parent)
 {
     XCapstone::openHandle(disasmMode, &g_handle, true, syntax);
 
@@ -38,7 +37,8 @@ Capstone_Bridge::~Capstone_Bridge()
     }
 }
 
-QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
+QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit,
+                                                               XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
@@ -49,7 +49,7 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
     state.nMaxSize = nDataSize;
     state.nAddress = nAddress;
 
-    while ((!(pPdStruct->bIsStop)) && (!(state.bIsStop))){
+    while ((!(pPdStruct->bIsStop)) && (!(state.bIsStop))) {
         XDisasmAbstract::DISASM_RESULT result = {};
         result.nAddress = nAddress;
 
@@ -154,16 +154,13 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
                             QString sNewString;
 
                             // TODO Check
-                            if ((g_syntax == XBinary::SYNTAX_DEFAULT) || (g_syntax == XBinary::SYNTAX_INTEL) ||
-                                (g_syntax == XBinary::SYNTAX_MASM)) {
+                            if ((g_syntax == XBinary::SYNTAX_DEFAULT) || (g_syntax == XBinary::SYNTAX_INTEL) || (g_syntax == XBinary::SYNTAX_MASM)) {
                                 if (result.sString.contains("rip + ")) {
-                                    sOldString =
-                                        QString("rip + %1").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
+                                    sOldString = QString("rip + %1").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
                                 }
                             } else if (g_syntax == XBinary::SYNTAX_ATT) {
                                 if (result.sString.contains("(%rip)")) {
-                                    sOldString =
-                                        QString("%1(%rip)").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
+                                    sOldString = QString("%1(%rip)").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
                                 }
                             }
 
