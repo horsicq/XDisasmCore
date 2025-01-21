@@ -5,12 +5,14 @@ DEPENDPATH += $$PWD/Modules
 
 HEADERS += \
     $$PWD/Modules/x7zip_properties.h \
+    $$PWD/Modules/xmacho_commands.h \
     $$PWD/Modules/capstone_bridge.h \
     $$PWD/xdisasmcore.h \
     $$PWD/xdisasmabstract.h
 
 SOURCES += \
     $$PWD/Modules/x7zip_properties.cpp \
+    $$PWD/Modules/xmacho_commands.cpp \
     $$PWD/Modules/capstone_bridge.cpp \
     $$PWD/xdisasmcore.cpp \
     $$PWD/xdisasmabstract.cpp

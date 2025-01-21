@@ -26,6 +26,7 @@
 #include "xdisasmabstract.h"
 #include "Modules/capstone_bridge.h"
 #include "Modules/x7zip_properties.h"
+#include "Modules/xmacho_commands.h"
 
 #ifdef QT_GUI_LIB
 #include <QColor>

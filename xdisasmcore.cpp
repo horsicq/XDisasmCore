@@ -49,6 +49,8 @@ void XDisasmCore::setMode(XBinary::DM disasmMode, XBinary::SYNTAX syntax)
             g_pDisasmAbstract = new Capstone_Bridge(disasmMode, syntax);
         } else if (disasmMode == XBinary::DM_CUSTOM_7ZIP_PROPERTIES) {
             g_pDisasmAbstract = new X7Zip_Properties();
+        } else if ((disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (disasmMode == XBinary::DM_CUSTOM_MACH_EXPORT) || (disasmMode == XBinary::DM_CUSTOM_MACH_REBASE)) {
+            g_pDisasmAbstract = new XMachO_Commands(disasmMode);
         }
 
         g_disasmMode = disasmMode;
