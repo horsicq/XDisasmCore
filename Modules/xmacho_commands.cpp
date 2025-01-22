@@ -48,6 +48,25 @@ quint64 XMachO_Commands::_handleULEB128(QList<DISASM_RESULT> *pListResults, char
     return nResult;
 }
 
+QString XMachO_Commands::_handleAnsiString(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const DISASM_OPTIONS &disasmOptions, QString sPrefix)
+{
+    if (pState->bIsStop) {
+        return 0;
+    }
+
+    qint64 nMaxSize = qMin(pState->nMaxSize - pState->nCurrentOffset, 256);
+    QString sResult = XBinary::_read_ansiString(pData + pState->nCurrentOffset, nMaxSize);
+
+    if (sResult != "") {
+        _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, sResult.size() + 1, sPrefix, sResult,
+                         pState, disasmOptions);
+    } else {
+        pState->bIsStop = true;
+    }
+
+    return sResult;
+}
+
 QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
@@ -61,8 +80,23 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
 
     if (g_disasmMode == XBinary::DM_CUSTOM_MACH_EXPORT) {
         while (!(state.bIsStop)) {
-            _handleULEB128(&listResult, pData, &state, disasmOptions, "TERMINAL_SIZE");
-            _handleULEB128(&listResult, pData, &state, disasmOptions, "FLAGS");
+            quint64 nTerminalSize = _handleULEB128(&listResult, pData, &state, disasmOptions, "TERMINAL_SIZE");
+
+            if (nTerminalSize > 0) {
+                _handleULEB128(&listResult, pData, &state, disasmOptions, "FLAGS");
+                _handleULEB128(&listResult, pData, &state, disasmOptions, "SYMBOL_OFFSET");
+            }
+
+            quint64 nChildCount = _handleULEB128(&listResult, pData, &state, disasmOptions, "CHILD_COUNT");
+
+            for (quint64 i = 0; i < nChildCount; i++) {
+                _handleAnsiString(&listResult, pData, &state, disasmOptions, "NODE_LABEL");
+                _handleULEB128(&listResult, pData, &state, disasmOptions, "NODE_OFFSET");
+            }
+
+            if ((nTerminalSize == 0) && (nChildCount == 0)) {
+                state.bIsStop = true;
+            }
         }
     } else {
         _addDisasmResult(&listResult, nAddress, nDataSize, "ARRAY", "TST", &state, disasmOptions);
