@@ -54,7 +54,7 @@ QString XMachO_Commands::_handleAnsiString(QList<DISASM_RESULT> *pListResults, c
         return 0;
     }
 
-    qint64 nMaxSize = qMin(pState->nMaxSize - pState->nCurrentOffset, 256);
+    qint64 nMaxSize = qMin(pState->nMaxSize - pState->nCurrentOffset, (qint64)256);
     QString sResult = XBinary::_read_ansiString(pData + pState->nCurrentOffset, nMaxSize);
 
     if (sResult != "") {
