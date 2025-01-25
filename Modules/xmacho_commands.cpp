@@ -21,8 +21,7 @@
 
 #include "xmacho_commands.h"
 
-XMachO_Commands::XMachO_Commands(XBinary::DM disasmMode, QObject *parent)
-    : XDisasmAbstract(parent)
+XMachO_Commands::XMachO_Commands(XBinary::DM disasmMode, QObject *parent) : XDisasmAbstract(parent)
 {
     g_disasmMode = disasmMode;
 }
@@ -58,8 +57,7 @@ QString XMachO_Commands::_handleAnsiString(QList<DISASM_RESULT> *pListResults, c
     QString sResult = XBinary::_read_ansiString(pData + pState->nCurrentOffset, nMaxSize);
 
     if (sResult != "") {
-        _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, sResult.size() + 1, sPrefix, sResult,
-                         pState, disasmOptions);
+        _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, sResult.size() + 1, sPrefix, sResult, pState, disasmOptions);
     } else {
         pState->bIsStop = true;
     }
@@ -67,7 +65,8 @@ QString XMachO_Commands::_handleAnsiString(QList<DISASM_RESULT> *pListResults, c
     return sResult;
 }
 
-QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
+QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit,
+                                                               XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 

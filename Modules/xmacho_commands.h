@@ -25,8 +25,7 @@
 #include "../xdisasmabstract.h"
 #include "xmach.h"
 
-class XMachO_Commands : public XDisasmAbstract
-{
+class XMachO_Commands : public XDisasmAbstract {
     Q_OBJECT
 
 public:
@@ -43,4 +42,4 @@ private:
     XBinary::DM g_disasmMode;
 };
 
-#endif // XMACHO_COMMANDS_H
+#endif  // XMACHO_COMMANDS_H
