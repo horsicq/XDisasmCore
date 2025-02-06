@@ -40,6 +40,7 @@ Capstone_Bridge::~Capstone_Bridge()
 QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                                                XBinary::PDSTRUCT *pPdStruct)
 {
+    cs_reg_name(0,0);
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
     STATE state = {};
@@ -79,11 +80,11 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
                         for (qint32 j = 0; j < pInsn->detail->x86.op_count; j++) {
                             // TODO mb use groups
                             if (pInsn->detail->x86.operands[j].type == X86_OP_IMM) {
-                                if (XCapstone::isCallOpcode(g_disasmFamily, pInsn->id)) {
+                                if (isCallOpcode(g_disasmFamily, pInsn->id)) {
                                     result.relType = XDisasmAbstract::RELTYPE_CALL;
-                                } else if (XCapstone::isJumpOpcode(g_disasmFamily, pInsn->id)) {
+                                } else if (isJumpOpcode(g_disasmFamily, pInsn->id)) {
                                     result.relType = XDisasmAbstract::RELTYPE_JMP_UNCOND;
-                                } else if (XCapstone::isCondJumpOpcode(g_disasmFamily, pInsn->id)) {
+                                } else if (isCondJumpOpcode(g_disasmFamily, pInsn->id)) {
                                     result.relType = XDisasmAbstract::RELTYPE_JMP_COND;
                                 } else {
                                     result.relType = XDisasmAbstract::RELTYPE_JMP;

@@ -110,7 +110,7 @@ QString XDisasmCore::getSignature(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMem
                     }
                 }
 
-                if (XCapstone::isBranchOpcode(g_disasmFamily, _disasmResult.nOpcode)) {
+                if (XDisasmAbstract::isBranchOpcode(g_disasmFamily, _disasmResult.nOpcode)) {
                     // TODO another archs !!!
                     if (g_disasmFamily == XBinary::DMFAMILY_X86) {
                         if (_disasmResult.nImmSize) {
