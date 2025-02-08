@@ -40,7 +40,7 @@ Capstone_Bridge::~Capstone_Bridge()
 QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                                                XBinary::PDSTRUCT *pPdStruct)
 {
-    cs_reg_name(0,0);
+    cs_reg_name(0, 0);
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
     STATE state = {};
