@@ -25,6 +25,39 @@ XDisasmAbstract::XDisasmAbstract(QObject *parent) : QObject(parent)
 {
 }
 
+XDisasmAbstract::DISASM_RESULT_EX XDisasmAbstract::disAsmEx(char *pData, qint32 nDataSize, XADDR nAddress)
+{
+    DISASM_RESULT_EX result = {};
+
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    DISASM_OPTIONS options = {};
+    QList<DISASM_RESULT> list = _disasm(pData, nDataSize, nAddress, options, 1, &pdStructEmpty);
+
+    if (list.count()) {
+        result.bIsValid = list.at(0).bIsValid;
+        result.bMemError = list.at(0).bMemError;
+        result.nAddress = list.at(0).nAddress;
+        result.nSize = list.at(0).nSize;
+        result.nOpcode = list.at(0).nOpcode;
+        result.relType = list.at(0).relType;
+        result.nXrefToRelative = list.at(0).nXrefToRelative;
+        result.memType = list.at(0).memType;
+        result.nXrefToMemory = list.at(0).nXrefToMemory;
+        result.nMemorySize = list.at(0).nMemorySize;
+        result.nNextAddress = list.at(0).nNextAddress;
+        result.nDispOffset = list.at(0).nDispOffset;
+        result.nDispSize = list.at(0).nDispSize;
+        result.nImmOffset = list.at(0).nImmOffset;
+        result.nImmSize = list.at(0).nImmSize;
+    } else {
+        result.bIsValid = false;
+        result.nAddress = nAddress;
+    }
+
+    return result;
+}
+
 QString XDisasmAbstract::getNumberString(qint64 nValue, XBinary::DM disasmMode, XBinary::SYNTAX syntax)
 {
     QString sResult;

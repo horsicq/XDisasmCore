@@ -94,6 +94,7 @@ public:
 
     XDisasmAbstract::DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     XDisasmAbstract::DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    XDisasmAbstract::DISASM_RESULT_EX disAsmEx(char *pData, qint32 nDataSize, XADDR nAddress);
 
     QList<XDisasmAbstract::DISASM_RESULT> disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions,
                                                      qint32 nLimit = -1, XBinary::PDSTRUCT *pPdStruct = 0);

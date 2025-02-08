@@ -56,6 +56,7 @@ public:
 
     struct DISASM_RESULT {
         bool bIsValid;
+        bool bMemError;
         XADDR nAddress;
         qint32 nSize;
         quint32 nOpcode;
@@ -74,13 +75,33 @@ public:
         quint32 nImmSize;
     };
 
+    struct DISASM_RESULT_EX {
+        bool bIsValid;
+        bool bMemError;
+        XADDR nAddress;
+        qint32 nSize;
+        quint32 nOpcode;
+        RELTYPE relType;
+        XADDR nXrefToRelative;
+        MEMTYPE memType;
+        XADDR nXrefToMemory;
+        qint32 nMemorySize;
+        XADDR nNextAddress;
+        quint32 nDispOffset;
+        quint32 nDispSize;
+        quint32 nImmOffset;
+        quint32 nImmSize;
+    };
+
     struct DISASM_OPTIONS {
         bool bIsUppercase;
+        bool bNoStrings;
     };
 
     explicit XDisasmAbstract(QObject *parent = nullptr);
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                          XBinary::PDSTRUCT *pPdStruct) = 0;
+    virtual DISASM_RESULT_EX disAsmEx(char *pData, qint32 nDataSize, XADDR nAddress);
 
     static QString getNumberString(qint64 nValue, XBinary::DM disasmMode, XBinary::SYNTAX syntax);
     static QString getOpcodeFullString(const DISASM_RESULT &disasmResult);

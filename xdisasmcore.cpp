@@ -232,6 +232,17 @@ XDisasmAbstract::DISASM_RESULT XDisasmCore::disAsm(QIODevice *pDevice, qint64 nO
     return disAsm(baData.data(), baData.size(), nAddress, disasmOptions);
 }
 
+XDisasmAbstract::DISASM_RESULT_EX XDisasmCore::disAsmEx(char *pData, qint32 nDataSize, XADDR nAddress)
+{
+    XDisasmAbstract::DISASM_RESULT_EX result = {};
+
+    if (g_pDisasmAbstract) {
+        result = g_pDisasmAbstract->disAsmEx(pData, nDataSize, nAddress);
+    }
+
+    return result;
+}
+
 QList<XDisasmAbstract::DISASM_RESULT> XDisasmCore::disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions,
                                                               qint32 nLimit, XBinary::PDSTRUCT *pPdStruct)
 {

@@ -59,11 +59,11 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
         quint64 nNumberOfOpcodes = cs_disasm(g_handle, (uint8_t *)pData, nDataSize, nAddress, 1, &pInsn);
 
         if (nNumberOfOpcodes > 0) {
+            result.bIsValid = true;
             result.nOpcode = pInsn->id;
             result.sMnemonic = pInsn->mnemonic;
             result.sString = pInsn->op_str;
             result.nSize = pInsn->size;
-            result.bIsValid = true;
             result.nNextAddress = nAddress + result.nSize;
 
             if (g_disasmFamily == XBinary::DMFAMILY_X86) {
@@ -189,6 +189,11 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
 
             cs_free(pInsn, nNumberOfOpcodes);
         } else {
+            if (cs_errno(g_handle) == CS_ERR_MEM) {
+                state.bIsStop = true;
+                result.bMemError = true;
+            }
+
             if (g_disasmFamily == XBinary::DMFAMILY_ARM) {
                 result.sMnemonic = tr("Invalid opcode");
                 result.nSize = 2;
