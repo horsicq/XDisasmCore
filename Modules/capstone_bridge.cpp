@@ -60,6 +60,10 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
 
         if (nNumberOfOpcodes > 0) {
             result.bIsValid = true;
+            result.bIsRet = isRetOpcode(g_disasmFamily, pInsn->id);
+            result.bIsCall = isCallOpcode(g_disasmFamily, pInsn->id);
+            result.bIsJmp = isJumpOpcode(g_disasmFamily, pInsn->id);
+            result.bIsCondJmp = isCondJumpOpcode(g_disasmFamily, pInsn->id);
             result.nOpcode = pInsn->id;
             result.sMnemonic = pInsn->mnemonic;
             result.sString = pInsn->op_str;
@@ -80,11 +84,11 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
                         for (qint32 j = 0; j < pInsn->detail->x86.op_count; j++) {
                             // TODO mb use groups
                             if (pInsn->detail->x86.operands[j].type == X86_OP_IMM) {
-                                if (isCallOpcode(g_disasmFamily, pInsn->id)) {
+                                if (result.bIsCall) {
                                     result.relType = XDisasmAbstract::RELTYPE_CALL;
-                                } else if (isJumpOpcode(g_disasmFamily, pInsn->id)) {
+                                } else if (result.bIsJmp) {
                                     result.relType = XDisasmAbstract::RELTYPE_JMP_UNCOND;
-                                } else if (isCondJumpOpcode(g_disasmFamily, pInsn->id)) {
+                                } else if (result.bIsCondJmp) {
                                     result.relType = XDisasmAbstract::RELTYPE_JMP_COND;
                                 } else {
                                     result.relType = XDisasmAbstract::RELTYPE_JMP;
