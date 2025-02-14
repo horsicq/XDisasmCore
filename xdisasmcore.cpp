@@ -27,6 +27,7 @@ XDisasmCore::XDisasmCore(QObject *pParent) : QObject(pParent)
     g_disasmFamily = XBinary::DMFAMILY_UNKNOWN;
     g_pDisasmAbstract = nullptr;
     g_nOpcodeSize = 15;
+    g_syntax = XBinary::SYNTAX_DEFAULT;
 }
 
 XDisasmCore::~XDisasmCore()
@@ -37,16 +38,16 @@ XDisasmCore::~XDisasmCore()
     }
 }
 
-void XDisasmCore::setMode(XBinary::DM disasmMode, XBinary::SYNTAX syntax)
+void XDisasmCore::setMode(XBinary::DM disasmMode)
 {
-    if ((g_disasmMode != disasmMode) || (g_syntax != syntax)) {
+    if (g_disasmMode != disasmMode) {
         if (g_pDisasmAbstract) {
             delete g_pDisasmAbstract;
             g_pDisasmAbstract = nullptr;
         }
 
         if (XCapstone::isModeValid(disasmMode)) {
-            g_pDisasmAbstract = new Capstone_Bridge(disasmMode, syntax);
+            g_pDisasmAbstract = new Capstone_Bridge(disasmMode, g_syntax);
         } else if (disasmMode == XBinary::DM_CUSTOM_7ZIP_PROPERTIES) {
             g_pDisasmAbstract = new X7Zip_Properties();
         } else if ((disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (disasmMode == XBinary::DM_CUSTOM_MACH_WEAK) || (disasmMode == XBinary::DM_CUSTOM_MACH_EXPORT) ||
@@ -56,7 +57,6 @@ void XDisasmCore::setMode(XBinary::DM disasmMode, XBinary::SYNTAX syntax)
 
         g_disasmMode = disasmMode;
         g_disasmFamily = XBinary::getDisasmFamily(disasmMode);
-        g_syntax = syntax;
     }
 }
 

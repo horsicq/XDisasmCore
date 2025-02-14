@@ -22,6 +22,7 @@
 #ifndef XDISASMCORE_H
 #define XDISASMCORE_H
 
+#include "xoptions.h"
 #include "xcapstone.h"
 #include "xdisasmabstract.h"
 #include "Modules/capstone_bridge.h"
@@ -90,7 +91,7 @@ public:
     explicit XDisasmCore(QObject *pParent = nullptr);
     ~XDisasmCore();
 
-    void setMode(XBinary::DM disasmMode, XBinary::SYNTAX syntax = XBinary::SYNTAX_DEFAULT);
+    void setMode(XBinary::DM disasmMode);
 
     XDisasmAbstract::DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     XDisasmAbstract::DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
