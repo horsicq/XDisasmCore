@@ -61,7 +61,7 @@ public:
         qint32 nSize;
         quint32 nOpcode;
         QString sMnemonic;
-        QString sString;
+        QString sOperands;
         RELTYPE relType;
         XADDR nXrefToRelative;
         MEMTYPE memType;

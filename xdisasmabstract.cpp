@@ -55,8 +55,8 @@ QString XDisasmAbstract::getOpcodeFullString(const DISASM_RESULT &disasmResult)
 {
     QString sResult = disasmResult.sMnemonic;
 
-    if (disasmResult.sString != "") {
-        sResult += " " + disasmResult.sString;
+    if (disasmResult.sOperands != "") {
+        sResult += " " + disasmResult.sOperands;
     }
 
     return sResult;
@@ -74,7 +74,7 @@ void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, DISAS
     if (!(pState->bIsStop)) {
         if (disasmOptions.bIsUppercase) {
             disasmResult.sMnemonic = disasmResult.sMnemonic.toUpper();
-            disasmResult.sString = disasmResult.sString.toUpper();
+            disasmResult.sOperands = disasmResult.sOperands.toUpper();
         }
 
         pListResults->append(disasmResult);
@@ -97,7 +97,7 @@ void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR
     disasmResult.nAddress = nAddress;
     disasmResult.nSize = nSize;
     disasmResult.sMnemonic = sMnemonic;
-    disasmResult.sString = sString;
+    disasmResult.sOperands = sString;
 
     _addDisasmResult(pListResults, disasmResult, pState, disasmOptions);
 }

@@ -31,6 +31,7 @@
 
 #ifdef QT_GUI_LIB
 #include <QColor>
+#include <QPainter>
 #endif
 
 class XDisasmCore : public QObject {
@@ -92,6 +93,8 @@ public:
     ~XDisasmCore();
 
     void setMode(XBinary::DM disasmMode);
+    void setSyntax(XBinary::SYNTAX syntax);
+    void setOptions(XOptions *pOptions);
 
     XDisasmAbstract::DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     XDisasmAbstract::DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
@@ -106,13 +109,23 @@ public:
     static QString replaceWildChar(const QString &sString, qint32 nOffset, qint32 nSize, QChar cWild);  // Move to XBinary
 
     QString getNumberString(qint64 nValue);
+#ifdef QT_GUI_LIB
+    COLOR_RECORD getColorRecord(OG og);
+    static QMap<OG, COLOR_RECORD> getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode);
+    static COLOR_RECORD getColorRecord(XOptions *pOptions, XOptions::ID id);
+    void drawDisasmText(QPainter *pPainter, QRectF rectText, const XDisasmAbstract::DISASM_RESULT &disasmResult);
+#endif
 
 private:
+    XOptions *g_pOptions;
     XBinary::DM g_disasmMode;
     XBinary::DMFAMILY g_disasmFamily;
     XBinary::SYNTAX g_syntax;
     qint32 g_nOpcodeSize;
     XDisasmAbstract *g_pDisasmAbstract;
+#ifdef QT_GUI_LIB
+    QMap<OG, COLOR_RECORD> g_mapColors;
+#endif
 };
 
 #endif  // XDISASMCORE_H

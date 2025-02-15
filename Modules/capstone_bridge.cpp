@@ -66,7 +66,7 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
             result.bIsCondJmp = isCondJumpOpcode(g_disasmFamily, pInsn->id);
             result.nOpcode = pInsn->id;
             result.sMnemonic = pInsn->mnemonic;
-            result.sString = pInsn->op_str;
+            result.sOperands = pInsn->op_str;
             result.nSize = pInsn->size;
             result.nNextAddress = nAddress + result.nSize;
 
@@ -160,18 +160,18 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
 
                             // TODO Check
                             if ((g_syntax == XBinary::SYNTAX_DEFAULT) || (g_syntax == XBinary::SYNTAX_INTEL) || (g_syntax == XBinary::SYNTAX_MASM)) {
-                                if (result.sString.contains("rip + ")) {
+                                if (result.sOperands.contains("rip + ")) {
                                     sOldString = QString("rip + %1").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
                                 }
                             } else if (g_syntax == XBinary::SYNTAX_ATT) {
-                                if (result.sString.contains("(%rip)")) {
+                                if (result.sOperands.contains("(%rip)")) {
                                     sOldString = QString("%1(%rip)").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
                                 }
                             }
 
                             if (sOldString != "") {
                                 sNewString = getNumberString(result.nXrefToMemory, g_disasmMode, g_syntax);
-                                result.sString = result.sString.replace(sOldString, sNewString);
+                                result.sOperands = result.sOperands.replace(sOldString, sNewString);
                             }
 
                             break;
@@ -209,7 +209,7 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
                 result.nSize = 2;
             } else {
                 result.sMnemonic = "db";
-                result.sString = getNumberString(*((uint8_t *)pData), g_disasmMode, g_syntax);
+                result.sOperands = getNumberString(*((uint8_t *)pData), g_disasmMode, g_syntax);
                 result.nSize = 1;
             }
         }
