@@ -67,7 +67,7 @@ void XDisasmCore::setSyntax(XBinary::SYNTAX syntax)
         g_syntax = syntax;
         XBinary::DM disasmMode = g_disasmMode;
         g_disasmMode = XBinary::DM_UNKNOWN;
-        setMode(disasmMode); // Reload
+        setMode(disasmMode);  // Reload
     }
 }
 
