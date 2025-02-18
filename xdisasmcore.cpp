@@ -255,9 +255,10 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
         if (!disasmResult.sMnemonic.isEmpty()) {
             _rectMnemonic = rectText;
             _rectMnemonic.setWidth(QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sMnemonic).width());
-            QColor mnemonicColor = QColor(0, 0, 255);
-            pPainter->setPen(mnemonicColor);
-            pPainter->drawText(_rectMnemonic, disasmResult.sMnemonic);
+
+            COLOR_RECORD colorRecord = getOpcodeColor(disasmResult.nOpcode);
+
+            drawColorText(pPainter, _rectMnemonic, disasmResult.sMnemonic, colorRecord);
         }
 
         if (!disasmResult.sOperands.isEmpty()) {
@@ -273,6 +274,63 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
 
         pPainter->restore();
     }
+}
+#endif
+#ifdef QT_GUI_LIB
+void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QString &sText, const COLOR_RECORD &colorRecord)
+{
+    if (colorRecord.colBackground.isValid() || colorRecord.colMain.isValid()) {
+        pPainter->save();
+
+        QRectF _rectString = rect;
+        _rectString.setWidth(QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, sText).width());
+
+        if (colorRecord.colBackground.isValid()) {
+            pPainter->fillRect(_rectString, QBrush(colorRecord.colBackground));
+        }
+
+        if (colorRecord.colMain.isValid()) {
+            pPainter->setPen(colorRecord.colMain);
+        }
+
+        pPainter->drawText(_rectString, sText);
+
+        pPainter->restore();
+    } else {
+        pPainter->drawText(rect, sText);
+    }
+}
+#endif
+#ifdef QT_GUI_LIB
+XDisasmCore::COLOR_RECORD XDisasmCore::getOpcodeColor(quint32 nOpcode)
+{
+    XDisasmCore::COLOR_RECORD result = {};
+
+    if (XDisasmAbstract::isCallOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_CALL);
+    } else if (XDisasmAbstract::isCondJumpOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_CONDJMP);
+    } else if (XDisasmAbstract::isRetOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_RET);
+    } else if (XDisasmAbstract::isPushOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_PUSH);
+    } else if (XDisasmAbstract::isPopOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_POP);
+    } else if (XDisasmAbstract::isNopOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_NOP);
+    } else if (XDisasmAbstract::isJumpOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_JMP);
+    } else if (XDisasmAbstract::isInt3Opcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_INT3);
+    } else if (XDisasmAbstract::isSyscallOpcode(g_disasmFamily, nOpcode)) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE_SYSCALL);
+    }
+
+    if ((!result.colMain.isValid()) && (!result.colBackground.isValid())) {
+        result = getColorRecord(XDisasmCore::OG_OPCODE);
+    }
+
+    return result;
 }
 #endif
 #ifdef QT_GUI_LIB

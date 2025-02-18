@@ -56,6 +56,8 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
 
         cs_insn *pInsn = nullptr;
 
+        //cs_reg_name
+
         quint64 nNumberOfOpcodes = cs_disasm(g_handle, (uint8_t *)pData, nDataSize, nAddress, 1, &pInsn);
 
         if (nNumberOfOpcodes > 0) {
@@ -179,6 +181,7 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
                     }
                 }
             }
+
 
             //            if (disasmMode == XBinary::DM_X86_64) {
             //                if (result.sString.contains("[rip + 0x")) {

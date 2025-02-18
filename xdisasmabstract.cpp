@@ -150,46 +150,6 @@ bool XDisasmAbstract::isJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
     return bResult;
 }
 
-bool XDisasmAbstract::isJumpOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
-{
-    Q_UNUSED(syntax)
-
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (sOpcode == "jmp") {
-            bResult = true;
-        }
-    } else if (dmFamily == XBinary::DMFAMILY_ARM) {
-        if (sOpcode == "b") {
-            bResult = true;
-        }
-    } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
-        if (sOpcode == "b") {
-            bResult = true;
-        }
-    } else if (dmFamily == XBinary::DMFAMILY_BPF) {
-        if (sOpcode == "jmp") {
-            bResult = true;
-        }
-    } else if (dmFamily == XBinary::DMFAMILY_SPARC) {
-        if (sOpcode == "jmp") {
-            bResult = true;
-        }
-    } else if (dmFamily == XBinary::DMFAMILY_MIPS) {
-        if ((sOpcode == "j") || (sOpcode == "jal")) {
-            bResult = true;
-        }
-    } else if (dmFamily == XBinary::DMFAMILY_M68K) {
-        if (sOpcode == "bra") {
-            bResult = true;
-        }
-    }
-    // TODO Other archs
-
-    return bResult;
-}
-
 bool XDisasmAbstract::isRetOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 {
     bool bResult = false;
@@ -224,28 +184,26 @@ bool XDisasmAbstract::isRetOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
     return bResult;
 }
 
-bool XDisasmAbstract::isRetOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
+bool XDisasmAbstract::isPushOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 {
-    Q_UNUSED(syntax)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (syntax == XBinary::SYNTAX_ATT) {
-            if ((sOpcode == "retw") || (sOpcode == "retl") || (sOpcode == "retq")) {
-                bResult = true;
-            }
-        } else {
-            if ((sOpcode == "ret") || (sOpcode == "retf")) {
-                bResult = true;
-            }
-        }
-    } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
-        if (sOpcode == "ret") {
+        if (nOpcodeID == X86_INS_PUSH) {
             bResult = true;
         }
-    } else if (dmFamily == XBinary::DMFAMILY_M68K) {
-        if ((sOpcode == "rte") || (sOpcode == "rts") || (sOpcode == "rtr") || (sOpcode == "rtd")) {
+    }
+    // TODO Other archs
+
+    return bResult;
+}
+
+bool XDisasmAbstract::isPopOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
+{
+    bool bResult = false;
+
+    if (dmFamily == XBinary::DMFAMILY_X86) {
+        if (nOpcodeID == X86_INS_POP) {
             bResult = true;
         }
     }
@@ -268,28 +226,6 @@ bool XDisasmAbstract::isCallOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
     return bResult;
 }
 
-bool XDisasmAbstract::isCallOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
-{
-    Q_UNUSED(syntax)
-
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (syntax == XBinary::SYNTAX_ATT) {
-            if ((sOpcode == "callw") || (sOpcode == "calll") || (sOpcode == "callq")) {
-                bResult = true;
-            }
-        } else {
-            if (sOpcode == "call") {
-                bResult = true;
-            }
-        }
-    }
-    // TODO Other archs
-
-    return bResult;
-}
-
 bool XDisasmAbstract::isCondJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 {
     bool bResult = false;
@@ -303,24 +239,6 @@ bool XDisasmAbstract::isCondJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpco
             bResult = true;
         }
     }
-
-    return bResult;
-}
-
-bool XDisasmAbstract::isCondJumpOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
-{
-    Q_UNUSED(syntax)
-
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if ((sOpcode == "je") || (sOpcode == "jne") || (sOpcode == "jz") || (sOpcode == "jnz") || (sOpcode == "ja") || (sOpcode == "jc") || (sOpcode == "jb") ||
-            (sOpcode == "jo") || (sOpcode == "jno") || (sOpcode == "js") || (sOpcode == "jns") || (sOpcode == "jae") || (sOpcode == "jbe") || (sOpcode == "jl") ||
-            (sOpcode == "jge") || (sOpcode == "jg") || (sOpcode == "jb") || (sOpcode == "loop") || (sOpcode == "loopne") || (sOpcode == "loope")) {
-            bResult = true;
-        }
-    }
-    // TODO Other archs
 
     return bResult;
 }
@@ -358,28 +276,6 @@ bool XDisasmAbstract::isNopOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
     return bResult;
 }
 
-bool XDisasmAbstract::isNopOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
-{
-    Q_UNUSED(syntax)
-
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (syntax == XBinary::SYNTAX_ATT) {
-            if ((sOpcode == "nopw") || (sOpcode == "nopl") || (sOpcode == "nopq")) {
-                bResult = true;
-            }
-        } else {
-            if (sOpcode == "nop") {
-                bResult = true;
-            }
-        }
-    }
-    // TODO Other archs
-
-    return bResult;
-}
-
 bool XDisasmAbstract::isInt3Opcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 {
     bool bResult = false;
@@ -394,75 +290,13 @@ bool XDisasmAbstract::isInt3Opcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
     return bResult;
 }
 
-bool XDisasmAbstract::isInt3Opcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
+bool XDisasmAbstract::isSyscallOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 {
-    Q_UNUSED(syntax)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (sOpcode == "int3") {
+        if (nOpcodeID == X86_INS_SYSCALL) {
             bResult = true;
-        }
-    }
-    // TODO Other archs
-
-    return bResult;
-}
-
-bool XDisasmAbstract::isSyscallOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
-{
-    Q_UNUSED(syntax)
-
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (sOpcode == "syscall") {
-            bResult = true;
-        }
-    }
-    // TODO Other archs
-
-    return bResult;
-}
-
-bool XDisasmAbstract::isPushOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
-{
-    Q_UNUSED(syntax)
-
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (syntax == XBinary::SYNTAX_ATT) {
-            if ((sOpcode == "pushw") || (sOpcode == "pushl") || (sOpcode == "pushq")) {
-                bResult = true;
-            }
-        } else {
-            if (sOpcode == "push") {
-                bResult = true;
-            }
-        }
-    }
-    // TODO Other archs
-
-    return bResult;
-}
-
-bool XDisasmAbstract::isPopOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax)
-{
-    Q_UNUSED(syntax)
-
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (syntax == XBinary::SYNTAX_ATT) {
-            if ((sOpcode == "popw") || (sOpcode == "popl") || (sOpcode == "popq")) {
-                bResult = true;
-            }
-        } else {
-            if (sOpcode == "pop") {
-                bResult = true;
-            }
         }
     }
     // TODO Other archs

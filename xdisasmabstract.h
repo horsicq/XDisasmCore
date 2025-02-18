@@ -92,20 +92,14 @@ public:
     static QString getOpcodeFullString(const DISASM_RESULT &disasmResult);
     static bool isBranchOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);  // mb TODO rename
     static bool isJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
-    static bool isJumpOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
     static bool isRetOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
-    static bool isRetOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
+    static bool isPushOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
+    static bool isPopOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
     static bool isCallOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
-    static bool isCallOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
     static bool isCondJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
-    static bool isCondJumpOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
     static bool isNopOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
-    static bool isNopOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
     static bool isInt3Opcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
-    static bool isInt3Opcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
-    static bool isSyscallOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
-    static bool isPushOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
-    static bool isPopOpcode(XBinary::DMFAMILY dmFamily, const QString &sOpcode, XBinary::SYNTAX syntax);
+    static bool isSyscallOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID);
     static bool isGeneralRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax);
     static bool isStackRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax);
     static bool isSegmentRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax);
