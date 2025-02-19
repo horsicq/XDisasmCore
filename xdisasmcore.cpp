@@ -29,6 +29,9 @@ XDisasmCore::XDisasmCore(QObject *pParent) : QObject(pParent)
     g_nOpcodeSize = 15;
     g_syntax = XBinary::SYNTAX_DEFAULT;
     g_pOptions = nullptr;
+#ifdef QT_GUI_LIB
+    g_qTextOptions.setWrapMode(QTextOption::NoWrap);
+#endif
 }
 
 XDisasmCore::~XDisasmCore()
@@ -249,29 +252,145 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
 {
     if (pPainter) {
         pPainter->save();
-        QRectF _rectMnemonic;
-        QRectF _rectOperands;
 
         if (!disasmResult.sMnemonic.isEmpty()) {
-            _rectMnemonic = rectText;
+            QRectF _rectMnemonic = rectText;
             _rectMnemonic.setWidth(QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sMnemonic).width());
 
             COLOR_RECORD colorRecord = getOpcodeColor(disasmResult.nOpcode);
 
             drawColorText(pPainter, _rectMnemonic, disasmResult.sMnemonic, colorRecord);
         }
+        // TODO nop
 
         if (!disasmResult.sOperands.isEmpty()) {
-            _rectOperands = rectText;
-            qreal dLeft = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sMnemonic + " ").width();
-            _rectOperands.setLeft(_rectOperands.left() + dLeft);
-            _rectOperands.setWidth(_rectOperands.width() - dLeft);
+            QRectF _rectOperands = rectText;
+            qreal _dLeft = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sMnemonic + " ").width();
+            _rectOperands.setLeft(_rectOperands.left() + _dLeft);
 
-            QColor operandColor = QColor(0, 128, 0);
-            pPainter->setPen(operandColor);
-            pPainter->drawText(_rectOperands, disasmResult.sOperands);
+            QString sCurrent;
+            QRectF _rectCurrent = _rectOperands;
+            qint32 nNumberOfChars = disasmResult.sOperands.size();
+
+            for (qint32 i = 0; i < nNumberOfChars; i++) {
+                QChar ch = disasmResult.sOperands.at(i);
+                if ((ch == ',') || (ch == '[') || (ch == ']') || (ch == '+') || (ch == '-') ||
+                    (ch == '*') || (ch == '(') || (ch == ')') || (ch == ':') || (ch == ' ')) {
+
+                    if (!sCurrent.isEmpty()) {
+                        drawOperand(pPainter, _rectCurrent, sCurrent);
+                    }
+                    sCurrent = "";
+
+                    pPainter->drawText(_rectOperands, ch, g_qTextOptions);
+                } else {
+                    sCurrent.append(ch);
+                }
+
+                qreal _dLeft = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sOperands.at(i)).width();
+                _rectOperands.setLeft(_rectOperands.left() + _dLeft);
+
+                if (sCurrent.isEmpty()) {
+                    _rectCurrent = _rectOperands;
+                }
+            }
+
+            if (!sCurrent.isEmpty()) {
+                drawOperand(pPainter, _rectCurrent, sCurrent);
+            }
         }
 
+        pPainter->restore();
+    }
+}
+#endif
+#ifdef QT_GUI_LIB
+void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString &sOperand)
+{
+    bool bRef = false;
+    bool bGeneralReg = false;
+    bool bStackReg = false;
+    bool bSegmentReg = false;
+    bool bDebugReg = false;
+    bool bInstructionPointerReg = false;
+    bool bFlagsReg = false;
+    bool bFPUReg = false;
+    bool bXMMReg = false;
+    bool bNumber = false;
+
+    if (XDisasmAbstract::isRef(g_disasmFamily, sOperand, g_syntax)) {
+        bRef = true;
+    } else if (XDisasmAbstract::isGeneralRegister(g_disasmFamily, sOperand, g_syntax)) {
+        bGeneralReg = true;
+    } else if (XDisasmAbstract::isStackRegister(g_disasmFamily, sOperand, g_syntax)) {
+        bStackReg = true;
+    } else if (XDisasmAbstract::isSegmentRegister(g_disasmFamily, sOperand, g_syntax)) {
+        bSegmentReg = true;
+    } else if (XDisasmAbstract::isDebugRegister(g_disasmFamily, sOperand, g_syntax)) {
+        bDebugReg = true;
+    } else if (XDisasmAbstract::isInstructionPointerRegister(g_disasmFamily, sOperand, g_syntax)) {
+        bInstructionPointerReg = true;
+    } else if (XDisasmAbstract::isFlagsRegister(g_disasmFamily, sOperand, g_syntax)) {
+        bFlagsReg = true;
+    } else if (XDisasmAbstract::isFPURegister(g_disasmFamily, sOperand, g_syntax)) {
+        bFPUReg = true;
+    } else if (XDisasmAbstract::isXMMRegister(g_disasmFamily, sOperand, g_syntax)) {
+        bXMMReg = true;
+    } else if (XDisasmAbstract::isNumber(g_disasmFamily, sOperand, g_syntax)) {
+        bNumber = true;
+    }
+
+    COLOR_RECORD colorRecord;
+
+    if (bRef) {
+        colorRecord = getColorRecord(XDisasmCore::OG_REFS);
+    } else if (bNumber) {
+        colorRecord = getColorRecord(XDisasmCore::OG_NUMBERS);
+    } else if (bGeneralReg || bStackReg || bSegmentReg || bDebugReg || bInstructionPointerReg || bFlagsReg || bFPUReg || bXMMReg) {
+        if (bGeneralReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_GENERAL);
+        } else if (bStackReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_STACK);
+        } else if (bSegmentReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_SEGMENT);
+        } else if (bDebugReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_DEBUG);
+        } else if (bInstructionPointerReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_IP);
+        } else if (bFlagsReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_FLAGS);
+        } else if (bFPUReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_FPU);
+        } else if (bXMMReg) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS_XMM);
+        }
+
+        if ((!colorRecord.colMain.isValid()) && (!colorRecord.colBackground.isValid())) {
+            colorRecord = getColorRecord(XDisasmCore::OG_REGS);
+        }
+    }
+
+    bool bSave = false;
+
+    if (colorRecord.colMain.isValid() || colorRecord.colBackground.isValid()) {
+        bSave = true;
+    }
+
+    if (bSave) {
+        pPainter->save();
+    }
+
+    if (colorRecord.colBackground.isValid()) {
+        pPainter->fillRect(rectText, QBrush(colorRecord.colBackground));
+    }
+
+    if (colorRecord.colMain.isValid()) {
+        pPainter->setPen(colorRecord.colMain);
+    }
+
+    pPainter->drawText(rectText, sOperand, g_qTextOptions);
+
+    if (bSave) {
         pPainter->restore();
     }
 }
@@ -293,11 +412,11 @@ void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QS
             pPainter->setPen(colorRecord.colMain);
         }
 
-        pPainter->drawText(_rectString, sText);
+        pPainter->drawText(_rectString, sText, g_qTextOptions);
 
         pPainter->restore();
     } else {
-        pPainter->drawText(rect, sText);
+        pPainter->drawText(rect, sText, g_qTextOptions);
     }
 }
 #endif

@@ -114,6 +114,7 @@ public:
     static QMap<OG, COLOR_RECORD> getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode);
     static COLOR_RECORD getColorRecord(XOptions *pOptions, XOptions::ID id);
     void drawDisasmText(QPainter *pPainter, QRectF rectText, const XDisasmAbstract::DISASM_RESULT &disasmResult);
+    void drawOperand(QPainter *pPainter, QRectF rectText, const QString &sOperand);
     void drawColorText(QPainter *pPainter, const QRectF &rect, const QString &sText, const XDisasmCore::COLOR_RECORD &colorRecord);
     XDisasmCore::COLOR_RECORD getOpcodeColor(quint32 nOpcode);
 #endif
@@ -127,6 +128,7 @@ private:
     XDisasmAbstract *g_pDisasmAbstract;
 #ifdef QT_GUI_LIB
     QMap<OG, COLOR_RECORD> g_mapColors;
+    QTextOption g_qTextOptions;
 #endif
 };
 
