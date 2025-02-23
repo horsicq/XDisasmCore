@@ -274,9 +274,7 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
 
             for (qint32 i = 0; i < nNumberOfChars; i++) {
                 QChar ch = disasmResult.sOperands.at(i);
-                if ((ch == ',') || (ch == '[') || (ch == ']') || (ch == '+') || (ch == '-') ||
-                    (ch == '*') || (ch == '(') || (ch == ')') || (ch == ':') || (ch == ' ')) {
-
+                if ((ch == ',') || (ch == '[') || (ch == ']') || (ch == '+') || (ch == '-') || (ch == '*') || (ch == '(') || (ch == ')') || (ch == ':') || (ch == ' ')) {
                     if (!sCurrent.isEmpty()) {
                         drawOperand(pPainter, _rectCurrent, sCurrent);
                     }
