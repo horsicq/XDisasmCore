@@ -162,8 +162,14 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
 
                             // TODO Check
                             if ((g_syntax == XBinary::SYNTAX_DEFAULT) || (g_syntax == XBinary::SYNTAX_INTEL) || (g_syntax == XBinary::SYNTAX_MASM)) {
-                                if (result.sOperands.contains("rip + ")) {
-                                    sOldString = QString("rip + %1").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
+                                if (pInsn->detail->x86.operands[i].mem.disp >= 0) {
+                                    if (result.sOperands.contains("rip + ")) {
+                                        sOldString = QString("rip + %1").arg(getNumberString(pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
+                                    }
+                                } else {
+                                    if (result.sOperands.contains("rip - ")) {
+                                        sOldString = QString("rip - %1").arg(getNumberString(0 - pInsn->detail->x86.operands[i].mem.disp, g_disasmMode, g_syntax));
+                                    }
                                 }
                             } else if (g_syntax == XBinary::SYNTAX_ATT) {
                                 if (result.sOperands.contains("(%rip)")) {
