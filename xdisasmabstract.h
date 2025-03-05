@@ -84,6 +84,18 @@ public:
         bool bNoStrings;
     };
 
+    enum REGS {
+        REGS_UNKNOWN = 0,
+        REGS_GENERAL,
+        REGS_FPU,
+        REGS_XMM,
+        REGS_STACK,
+        REGS_SEGMENT,
+        REGS_FLAGS,
+        REGS_DEBUG,
+        REGS_IP
+    };
+
     explicit XDisasmAbstract(QObject *parent = nullptr);
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                          XBinary::PDSTRUCT *pPdStruct) = 0;
