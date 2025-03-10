@@ -100,6 +100,9 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                 _handleTag(pListResults, pData, XSevenZip::k7zIdEnd, pState, disasmOptions);
             } else if (puTag.nValue == XSevenZip::k7zIdFilesInfo) {
                 quint64 nNumberOfFiles = _handleNumber(pListResults, pData, pState, disasmOptions);  // Number of Files
+                for (quint64 i = 0; (i < nNumberOfFiles) && (!(pState->bIsStop)); i++) {
+                    _handleNumber(pListResults, pData, pState, disasmOptions);  // File ID, NUMBER
+                }
             } else if (puTag.nValue == XSevenZip::k7zIdFolder) {
                 quint64 nNumberOfFolders = _handleNumber(pListResults, pData, pState, disasmOptions);  // Number of Folders
                 quint8 nExt = _handleByte(pListResults, pData, pState, disasmOptions);                 // External
