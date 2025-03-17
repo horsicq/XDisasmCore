@@ -89,7 +89,7 @@ void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, DISAS
     }
 }
 
-void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState,
+void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, const QString &sMnemonic, const QString &sString, STATE *pState,
                                        const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
 {
     DISASM_RESULT disasmResult = {};

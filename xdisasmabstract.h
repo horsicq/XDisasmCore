@@ -127,7 +127,7 @@ public:
     static QString removeRegPrefix(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax);
 
     void _addDisasmResult(QList<DISASM_RESULT> *pListResults, DISASM_RESULT &disasmResult, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
-    void _addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, QString sMnemonic, QString sString, STATE *pState,
+    void _addDisasmResult(QList<DISASM_RESULT> *pListResults, XADDR nAddress, qint32 nSize, const QString &sMnemonic, const QString &sString, STATE *pState,
                           const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 };
 
