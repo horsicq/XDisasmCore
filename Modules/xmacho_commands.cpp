@@ -26,7 +26,7 @@ XMachO_Commands::XMachO_Commands(XBinary::DM disasmMode, QObject *parent) : XDis
     g_disasmMode = disasmMode;
 }
 
-quint64 XMachO_Commands::_handleULEB128(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const DISASM_OPTIONS &disasmOptions, QString sPrefix)
+quint64 XMachO_Commands::_handleULEB128(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const DISASM_OPTIONS &disasmOptions, const QString &sPrefix)
 {
     if (pState->bIsStop) {
         return 0;
@@ -47,7 +47,7 @@ quint64 XMachO_Commands::_handleULEB128(QList<DISASM_RESULT> *pListResults, char
     return nResult;
 }
 
-QString XMachO_Commands::_handleAnsiString(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const DISASM_OPTIONS &disasmOptions, QString sPrefix)
+QString XMachO_Commands::_handleAnsiString(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const DISASM_OPTIONS &disasmOptions, const QString &sPrefix)
 {
     if (pState->bIsStop) {
         return 0;

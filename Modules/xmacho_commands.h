@@ -35,8 +35,8 @@ public:
                                          XBinary::PDSTRUCT *pPdStruct);
 
 private:
-    quint64 _handleULEB128(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, QString sPrefix);
-    QString _handleAnsiString(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, QString sPrefix);
+    quint64 _handleULEB128(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, const QString &sPrefix);
+    QString _handleAnsiString(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, const QString &sPrefix);
 
 private:
     XBinary::DM g_disasmMode;
