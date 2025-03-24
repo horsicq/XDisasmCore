@@ -83,6 +83,11 @@ void XDisasmCore::setOptions(XOptions *pOptions)
 #endif
 }
 
+XBinary::DMFAMILY XDisasmCore::getDisasmFamily()
+{
+    return g_disasmFamily;
+}
+
 XBinary::SYNTAX XDisasmCore::getSyntax()
 {
     return g_syntax;

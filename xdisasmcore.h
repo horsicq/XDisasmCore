@@ -96,6 +96,8 @@ public:
     void setSyntax(XBinary::SYNTAX syntax);
     void setOptions(XOptions *pOptions);
 
+    XBinary::DMFAMILY getDisasmFamily();
+
     XDisasmAbstract::DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     XDisasmAbstract::DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 
