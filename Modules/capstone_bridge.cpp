@@ -50,7 +50,7 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
     state.nMaxSize = nDataSize;
     state.nAddress = nAddress;
 
-    while ((!(pPdStruct->bIsStop)) && (!(state.bIsStop))) {
+    while (XBinary::isPdStructNotCanceled(pPdStruct) && (!(state.bIsStop))) {
         XDisasmAbstract::DISASM_RESULT result = {};
         result.nAddress = nAddress;
 
