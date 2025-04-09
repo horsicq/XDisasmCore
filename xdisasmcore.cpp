@@ -258,48 +258,53 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
     if (pPainter) {
         pPainter->save();
 
+        COLOR_RECORD colorRecord = COLOR_RECORD();
+
         if (!disasmResult.sMnemonic.isEmpty()) {
             QRectF _rectMnemonic = rectText;
             _rectMnemonic.setWidth(QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sMnemonic).width());
 
-            COLOR_RECORD colorRecord = getOpcodeColor(disasmResult.nOpcode);
+            colorRecord = getOpcodeColor(disasmResult.nOpcode);
 
             drawColorText(pPainter, _rectMnemonic, disasmResult.sMnemonic, colorRecord);
         }
-        // TODO nop
 
         if (!disasmResult.sOperands.isEmpty()) {
             QRectF _rectOperands = rectText;
             qreal _dLeft = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sMnemonic + " ").width();
             _rectOperands.setLeft(_rectOperands.left() + _dLeft);
 
-            QString sCurrent;
-            QRectF _rectCurrent = _rectOperands;
-            qint32 nNumberOfChars = disasmResult.sOperands.size();
+            if (!XDisasmAbstract::isNopOpcode(g_disasmFamily, disasmResult.nOpcode)) {
+                QString sCurrent;
+                QRectF _rectCurrent = _rectOperands;
+                qint32 nNumberOfChars = disasmResult.sOperands.size();
 
-            for (qint32 i = 0; i < nNumberOfChars; i++) {
-                QChar ch = disasmResult.sOperands.at(i);
-                if ((ch == ',') || (ch == '[') || (ch == ']') || (ch == '+') || (ch == '-') || (ch == '*') || (ch == '(') || (ch == ')') || (ch == ':') || (ch == ' ')) {
-                    if (!sCurrent.isEmpty()) {
-                        drawOperand(pPainter, _rectCurrent, sCurrent);
+                for (qint32 i = 0; i < nNumberOfChars; i++) {
+                    QChar ch = disasmResult.sOperands.at(i);
+                    if ((ch == ',') || (ch == '[') || (ch == ']') || (ch == '+') || (ch == '-') || (ch == '*') || (ch == '(') || (ch == ')') || (ch == ':') || (ch == ' ')) {
+                        if (!sCurrent.isEmpty()) {
+                            drawOperand(pPainter, _rectCurrent, sCurrent);
+                        }
+                        sCurrent = "";
+
+                        pPainter->drawText(_rectOperands, ch, g_qTextOptions);
+                    } else {
+                        sCurrent.append(ch);
                     }
-                    sCurrent = "";
 
-                    pPainter->drawText(_rectOperands, ch, g_qTextOptions);
-                } else {
-                    sCurrent.append(ch);
+                    qreal _dLeft = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sOperands.at(i)).width();
+                    _rectOperands.setLeft(_rectOperands.left() + _dLeft);
+
+                    if (sCurrent.isEmpty()) {
+                        _rectCurrent = _rectOperands;
+                    }
                 }
 
-                qreal _dLeft = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sOperands.at(i)).width();
-                _rectOperands.setLeft(_rectOperands.left() + _dLeft);
-
-                if (sCurrent.isEmpty()) {
-                    _rectCurrent = _rectOperands;
+                if (!sCurrent.isEmpty()) {
+                    drawOperand(pPainter, _rectCurrent, sCurrent);
                 }
-            }
-
-            if (!sCurrent.isEmpty()) {
-                drawOperand(pPainter, _rectCurrent, sCurrent);
+            } else {
+                drawColorText(pPainter, _rectOperands, disasmResult.sOperands, colorRecord);
             }
         }
 
