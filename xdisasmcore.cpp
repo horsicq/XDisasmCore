@@ -78,9 +78,8 @@ void XDisasmCore::setOptions(XOptions *pOptions)
 {
     g_pOptions = pOptions;
     setSyntax(XBinary::stringToSyntaxId(pOptions->getValue(XOptions::ID_DISASM_SYNTAX).toString()));
-#ifdef QT_GUI_LIB
+
     g_mapColors = getColorRecordsMap(pOptions, g_disasmMode);
-#endif
 }
 
 XBinary::DMFAMILY XDisasmCore::getDisasmFamily()
@@ -373,14 +372,14 @@ void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString
             colorRecord = getColorRecord(XDisasmCore::OG_REGS_XMM);
         }
 
-        if ((!colorRecord.colMain.isValid()) && (!colorRecord.colBackground.isValid())) {
+        if ((colorRecord.sColorMain == "") && (colorRecord.sColorBackground == "")) {
             colorRecord = getColorRecord(XDisasmCore::OG_REGS);
         }
     }
 
     bool bSave = false;
 
-    if (colorRecord.colMain.isValid() || colorRecord.colBackground.isValid()) {
+    if ((colorRecord.sColorMain != "") || (colorRecord.sColorBackground != "")) {
         bSave = true;
     }
 
@@ -388,12 +387,12 @@ void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString
         pPainter->save();
     }
 
-    if (colorRecord.colBackground.isValid()) {
-        pPainter->fillRect(rectText, QBrush(colorRecord.colBackground));
+    if (colorRecord.sColorBackground != "") {
+        pPainter->fillRect(rectText, QBrush(XOptions::stringToColor(colorRecord.sColorBackground)));
     }
 
-    if (colorRecord.colMain.isValid()) {
-        pPainter->setPen(colorRecord.colMain);
+    if (colorRecord.sColorMain != "") {
+        pPainter->setPen(XOptions::stringToColor(colorRecord.sColorMain));
     }
 
     pPainter->drawText(rectText, sOperand, g_qTextOptions);
@@ -406,18 +405,18 @@ void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString
 #ifdef QT_GUI_LIB
 void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QString &sText, const COLOR_RECORD &colorRecord)
 {
-    if (colorRecord.colBackground.isValid() || colorRecord.colMain.isValid()) {
+    if ((colorRecord.sColorMain != "") || (colorRecord.sColorBackground != "")) {
         pPainter->save();
 
         QRectF _rectString = rect;
         _rectString.setWidth(QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, sText).width());
 
-        if (colorRecord.colBackground.isValid()) {
-            pPainter->fillRect(_rectString, QBrush(colorRecord.colBackground));
+        if (colorRecord.sColorBackground != "") {
+            pPainter->fillRect(_rectString, QBrush(XOptions::stringToColor(colorRecord.sColorBackground)));
         }
 
-        if (colorRecord.colMain.isValid()) {
-            pPainter->setPen(colorRecord.colMain);
+        if (colorRecord.sColorMain != "") {
+            pPainter->setPen(XOptions::stringToColor(colorRecord.sColorMain));
         }
 
         pPainter->drawText(_rectString, sText, g_qTextOptions);
@@ -428,7 +427,6 @@ void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QS
     }
 }
 #endif
-#ifdef QT_GUI_LIB
 XDisasmCore::COLOR_RECORD XDisasmCore::getOpcodeColor(quint32 nOpcode)
 {
     XDisasmCore::COLOR_RECORD result = {};
@@ -453,14 +451,13 @@ XDisasmCore::COLOR_RECORD XDisasmCore::getOpcodeColor(quint32 nOpcode)
         result = getColorRecord(XDisasmCore::OG_OPCODE_SYSCALL);
     }
 
-    if ((!result.colMain.isValid()) && (!result.colBackground.isValid())) {
+    if ((result.sColorMain == "") && (result.sColorBackground == "")) {
         result = getColorRecord(XDisasmCore::OG_OPCODE);
     }
 
     return result;
 }
-#endif
-#ifdef QT_GUI_LIB
+
 XDisasmCore::COLOR_RECORD XDisasmCore::getColorRecord(XOptions *pOptions, XOptions::ID id)
 {
     XDisasmCore::COLOR_RECORD result = {};
@@ -470,17 +467,16 @@ XDisasmCore::COLOR_RECORD XDisasmCore::getColorRecord(XOptions *pOptions, XOptio
     QString sBackgroundCode = sCode.section("|", 1, 1);
 
     if (sColorCode != "") {
-        result.colMain.setNamedColor(sColorCode);
+        result.sColorMain = sColorCode;
     }
 
     if (sBackgroundCode != "") {
-        result.colBackground.setNamedColor(sBackgroundCode);
+        result.sColorBackground = sBackgroundCode;
     }
 
     return result;
 }
-#endif
-#ifdef QT_GUI_LIB
+
 QMap<XDisasmCore::OG, XDisasmCore::COLOR_RECORD> XDisasmCore::getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode)
 {
     XBinary::DMFAMILY dmFamily = XBinary::getDisasmFamily(disasmMode);
@@ -525,13 +521,11 @@ QMap<XDisasmCore::OG, XDisasmCore::COLOR_RECORD> XDisasmCore::getColorRecordsMap
 
     return mapResult;
 }
-#endif
-#ifdef QT_GUI_LIB
+
 XDisasmCore::COLOR_RECORD XDisasmCore::getColorRecord(OG og)
 {
     return g_mapColors.value(og);
 }
-#endif
 
 XDisasmAbstract::DISASM_RESULT XDisasmCore::disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
 {
