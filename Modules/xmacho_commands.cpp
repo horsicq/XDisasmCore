@@ -21,7 +21,7 @@
 
 #include "xmacho_commands.h"
 
-XMachO_Commands::XMachO_Commands(XBinary::DM disasmMode, QObject *parent) : XDisasmAbstract(parent)
+XMachO_Commands::XMachO_Commands(XBinary::DM disasmMode, QObject *pParent) : XDisasmAbstract(pParent)
 {
     g_disasmMode = disasmMode;
 }

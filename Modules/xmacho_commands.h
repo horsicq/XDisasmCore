@@ -29,7 +29,7 @@ class XMachO_Commands : public XDisasmAbstract {
     Q_OBJECT
 
 public:
-    explicit XMachO_Commands(XBinary::DM disasmMode, QObject *parent = nullptr);
+    explicit XMachO_Commands(XBinary::DM disasmMode, QObject *pParent = nullptr);
 
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                          XBinary::PDSTRUCT *pPdStruct);

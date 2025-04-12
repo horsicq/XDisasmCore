@@ -96,7 +96,7 @@ public:
         REGS_IP
     };
 
-    explicit XDisasmAbstract(QObject *parent = nullptr);
+    explicit XDisasmAbstract(QObject *pParent = nullptr);
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                          XBinary::PDSTRUCT *pPdStruct) = 0;
 

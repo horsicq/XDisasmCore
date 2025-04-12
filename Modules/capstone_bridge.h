@@ -28,7 +28,7 @@
 class Capstone_Bridge : public XDisasmAbstract {
     Q_OBJECT
 public:
-    explicit Capstone_Bridge(XBinary::DM disasmMode, XBinary::SYNTAX syntax = XBinary::SYNTAX_DEFAULT, QObject *parent = nullptr);
+    explicit Capstone_Bridge(XBinary::DM disasmMode, XBinary::SYNTAX syntax = XBinary::SYNTAX_DEFAULT, QObject *pParent = nullptr);
     ~Capstone_Bridge();
 
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,

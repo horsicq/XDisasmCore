@@ -28,7 +28,7 @@
 class X7Zip_Properties : public XDisasmAbstract {
     Q_OBJECT
 public:
-    explicit X7Zip_Properties(QObject *parent = nullptr);
+    explicit X7Zip_Properties(QObject *pParent = nullptr);
 
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                          XBinary::PDSTRUCT *pPdStruct);

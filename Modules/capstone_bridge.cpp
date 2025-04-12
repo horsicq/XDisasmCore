@@ -21,7 +21,7 @@
 
 #include "capstone_bridge.h"
 
-Capstone_Bridge::Capstone_Bridge(XBinary::DM disasmMode, XBinary::SYNTAX syntax, QObject *parent) : XDisasmAbstract(parent)
+Capstone_Bridge::Capstone_Bridge(XBinary::DM disasmMode, XBinary::SYNTAX syntax, QObject *pParent) : XDisasmAbstract(pParent)
 {
     XCapstone::openHandle(disasmMode, &g_handle, true, syntax);
 

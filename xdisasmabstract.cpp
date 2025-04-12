@@ -21,7 +21,7 @@
 
 #include "xdisasmabstract.h"
 
-XDisasmAbstract::XDisasmAbstract(QObject *parent) : QObject(parent)
+XDisasmAbstract::XDisasmAbstract(QObject *pParent) : QObject(pParent)
 {
 }
 

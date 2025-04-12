@@ -21,7 +21,7 @@
 
 #include "x7zip_properties.h"
 
-X7Zip_Properties::X7Zip_Properties(QObject *parent) : XDisasmAbstract(parent)
+X7Zip_Properties::X7Zip_Properties(QObject *pParent) : XDisasmAbstract(pParent)
 {
 }
 
