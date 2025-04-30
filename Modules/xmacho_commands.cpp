@@ -78,7 +78,7 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
     state.nAddress = nAddress;
 
     if (g_disasmMode == XBinary::DM_CUSTOM_MACH_EXPORT) {
-        while (!(state.bIsStop)) {
+        while (!(state.bIsStop) && XBinary::isPdStructNotCanceled(pPdStruct)) {
             quint64 nTerminalSize = _handleULEB128(&listResult, pData, &state, disasmOptions, "TERMINAL_SIZE");
 
             if (nTerminalSize > 0) {
