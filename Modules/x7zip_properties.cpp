@@ -235,6 +235,8 @@ QByteArray X7Zip_Properties::_handleArray(QList<DISASM_RESULT> *pListResults, ch
 QList<XDisasmAbstract::DISASM_RESULT> X7Zip_Properties::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                                                 XBinary::PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
     STATE state = {};
