@@ -73,7 +73,7 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                     _handleNumber(pListResults, pData, pState, disasmOptions);  // Size
                 }
                 for (quint64 i = 0; (i < nCount) && (!(pState->bIsStop)); i++) {
-                    _handleNumber(pListResults, pData, pState, disasmOptions);  // CRC
+                    _handleNumber(pListResults, pData, pState, disasmOptions);  // CRC // Check UINT32
                 }
                 _handleTag(pListResults, pData, XSevenZip::k7zIdEnd, pState, disasmOptions);
             } else if (puTag.nValue == XSevenZip::k7zIdUnpackInfo) {
