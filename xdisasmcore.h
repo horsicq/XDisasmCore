@@ -82,11 +82,6 @@ public:
         OG_OPCODE_SYSCALL
     };
 
-    struct COLOR_RECORD {
-        QString sColorMain;
-        QString sColorBackground;
-    };
-
     explicit XDisasmCore(QObject *pParent = nullptr);
     ~XDisasmCore();
 
@@ -110,15 +105,15 @@ public:
 
     QString getNumberString(qint64 nValue);
 
-    COLOR_RECORD getColorRecord(OG og);
-    static QMap<OG, COLOR_RECORD> getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode);
-    static COLOR_RECORD getColorRecord(XOptions *pOptions, XOptions::ID id);
+    XOptions::COLOR_RECORD getColorRecord(OG og);
+    static QMap<OG, XOptions::COLOR_RECORD> getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode);
+    static XOptions::COLOR_RECORD getColorRecord(XOptions *pOptions, XOptions::ID id);
 #ifdef QT_GUI_LIB
     void drawDisasmText(QPainter *pPainter, QRectF rectText, const XDisasmAbstract::DISASM_RESULT &disasmResult);
     void drawOperand(QPainter *pPainter, QRectF rectText, const QString &sOperand);
-    void drawColorText(QPainter *pPainter, const QRectF &rect, const QString &sText, const XDisasmCore::COLOR_RECORD &colorRecord);
+    void drawColorText(QPainter *pPainter, const QRectF &rect, const QString &sText, const XOptions::COLOR_RECORD &colorRecord);
 #endif
-    XDisasmCore::COLOR_RECORD getOpcodeColor(quint32 nOpcode);
+    XOptions::COLOR_RECORD getOpcodeColor(quint32 nOpcode);
 
 private:
     XOptions *g_pOptions;
@@ -127,7 +122,7 @@ private:
     XBinary::SYNTAX g_syntax;
     qint32 g_nOpcodeSize;
     XDisasmAbstract *g_pDisasmAbstract;
-    QMap<OG, COLOR_RECORD> g_mapColors;
+    QMap<OG, XOptions::COLOR_RECORD> g_mapColors;
 #ifdef QT_GUI_LIB
     QTextOption g_qTextOptions;
 #endif

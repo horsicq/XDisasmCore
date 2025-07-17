@@ -257,7 +257,7 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
     if (pPainter) {
         pPainter->save();
 
-        COLOR_RECORD colorRecord = COLOR_RECORD();
+        XOptions::COLOR_RECORD colorRecord = XOptions::COLOR_RECORD();
 
         if (!disasmResult.sMnemonic.isEmpty()) {
             QRectF _rectMnemonic = rectText;
@@ -348,7 +348,7 @@ void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString
         bNumber = true;
     }
 
-    COLOR_RECORD colorRecord;
+    XOptions::COLOR_RECORD colorRecord;
 
     if (bRef) {
         colorRecord = getColorRecord(XDisasmCore::OG_REFS);
@@ -404,7 +404,7 @@ void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString
 }
 #endif
 #ifdef QT_GUI_LIB
-void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QString &sText, const COLOR_RECORD &colorRecord)
+void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QString &sText, const XOptions::COLOR_RECORD &colorRecord)
 {
     if ((colorRecord.sColorMain != "") || (colorRecord.sColorBackground != "")) {
         pPainter->save();
@@ -428,9 +428,9 @@ void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QS
     }
 }
 #endif
-XDisasmCore::COLOR_RECORD XDisasmCore::getOpcodeColor(quint32 nOpcode)
+XOptions::COLOR_RECORD XDisasmCore::getOpcodeColor(quint32 nOpcode)
 {
-    XDisasmCore::COLOR_RECORD result = {};
+    XOptions::COLOR_RECORD result = {};
 
     if (XDisasmAbstract::isCallOpcode(g_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_CALL);
@@ -459,9 +459,9 @@ XDisasmCore::COLOR_RECORD XDisasmCore::getOpcodeColor(quint32 nOpcode)
     return result;
 }
 
-XDisasmCore::COLOR_RECORD XDisasmCore::getColorRecord(XOptions *pOptions, XOptions::ID id)
+XOptions::COLOR_RECORD XDisasmCore::getColorRecord(XOptions *pOptions, XOptions::ID id)
 {
-    XDisasmCore::COLOR_RECORD result = {};
+    XOptions::COLOR_RECORD result = {};
 
     QString sCode = pOptions->getValue(id).toString();
     QString sColorCode = sCode.section("|", 0, 0);
@@ -478,11 +478,11 @@ XDisasmCore::COLOR_RECORD XDisasmCore::getColorRecord(XOptions *pOptions, XOptio
     return result;
 }
 
-QMap<XDisasmCore::OG, XDisasmCore::COLOR_RECORD> XDisasmCore::getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode)
+QMap<XDisasmCore::OG, XOptions::COLOR_RECORD> XDisasmCore::getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode)
 {
     XBinary::DMFAMILY dmFamily = XBinary::getDisasmFamily(disasmMode);
 
-    QMap<XDisasmCore::OG, XDisasmCore::COLOR_RECORD> mapResult;
+    QMap<XDisasmCore::OG, XOptions::COLOR_RECORD> mapResult;
 
     mapResult.insert(XDisasmCore::OG_ARROWS, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARROWS));
     mapResult.insert(XDisasmCore::OG_ARROWS_SELECTED, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARROWS_SELECTED));
@@ -523,7 +523,7 @@ QMap<XDisasmCore::OG, XDisasmCore::COLOR_RECORD> XDisasmCore::getColorRecordsMap
     return mapResult;
 }
 
-XDisasmCore::COLOR_RECORD XDisasmCore::getColorRecord(OG og)
+XOptions::COLOR_RECORD XDisasmCore::getColorRecord(OG og)
 {
     return g_mapColors.value(og);
 }
