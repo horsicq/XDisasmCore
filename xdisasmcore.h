@@ -116,15 +116,15 @@ public:
     XOptions::COLOR_RECORD getOpcodeColor(quint32 nOpcode);
 
 private:
-    XOptions *g_pOptions;
-    XBinary::DM g_disasmMode;
-    XBinary::DMFAMILY g_disasmFamily;
-    XBinary::SYNTAX g_syntax;
-    qint32 g_nOpcodeSize;
-    XDisasmAbstract *g_pDisasmAbstract;
-    QMap<OG, XOptions::COLOR_RECORD> g_mapColors;
+    XOptions *m_pOptions;
+    XBinary::DM m_disasmMode;
+    XBinary::DMFAMILY m_disasmFamily;
+    XBinary::SYNTAX m_syntax;
+    qint32 m_nOpcodeSize;
+    XDisasmAbstract *m_pDisasmAbstract;
+    QMap<OG, XOptions::COLOR_RECORD> m_mapColors;
 #ifdef QT_GUI_LIB
-    QTextOption g_qTextOptions;
+    QTextOption m_qTextOptions;
 #endif
 };
 

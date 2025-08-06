@@ -23,73 +23,73 @@
 
 XDisasmCore::XDisasmCore(QObject *pParent) : QObject(pParent)
 {
-    g_disasmMode = XBinary::DM_UNKNOWN;
-    g_disasmFamily = XBinary::DMFAMILY_UNKNOWN;
-    g_pDisasmAbstract = nullptr;
-    g_nOpcodeSize = 15;
-    g_syntax = XBinary::SYNTAX_DEFAULT;
-    g_pOptions = nullptr;
+    m_disasmMode = XBinary::DM_UNKNOWN;
+    m_disasmFamily = XBinary::DMFAMILY_UNKNOWN;
+    m_pDisasmAbstract = nullptr;
+    m_nOpcodeSize = 15;
+    m_syntax = XBinary::SYNTAX_DEFAULT;
+    m_pOptions = nullptr;
 #ifdef QT_GUI_LIB
-    g_qTextOptions.setWrapMode(QTextOption::NoWrap);
+    m_qTextOptions.setWrapMode(QTextOption::NoWrap);
 #endif
 }
 
 XDisasmCore::~XDisasmCore()
 {
-    if (g_pDisasmAbstract) {
-        delete g_pDisasmAbstract;
-        // XCapstone::closeHandle(&g_handle);
+    if (m_pDisasmAbstract) {
+        delete m_pDisasmAbstract;
+        // XCapstone::closeHandle(&m_handle);
     }
 }
 
 void XDisasmCore::setMode(XBinary::DM disasmMode)
 {
-    if (g_disasmMode != disasmMode) {
-        if (g_pDisasmAbstract) {
-            delete g_pDisasmAbstract;
-            g_pDisasmAbstract = nullptr;
+    if (m_disasmMode != disasmMode) {
+        if (m_pDisasmAbstract) {
+            delete m_pDisasmAbstract;
+            m_pDisasmAbstract = nullptr;
         }
 
         if (XCapstone::isModeValid(disasmMode)) {
-            g_pDisasmAbstract = new Capstone_Bridge(disasmMode, g_syntax);
+            m_pDisasmAbstract = new Capstone_Bridge(disasmMode, m_syntax);
         } else if (disasmMode == XBinary::DM_CUSTOM_7ZIP_PROPERTIES) {
-            g_pDisasmAbstract = new X7Zip_Properties();
+            m_pDisasmAbstract = new X7Zip_Properties();
         } else if ((disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (disasmMode == XBinary::DM_CUSTOM_MACH_WEAK) || (disasmMode == XBinary::DM_CUSTOM_MACH_EXPORT) ||
                    (disasmMode == XBinary::DM_CUSTOM_MACH_REBASE)) {
-            g_pDisasmAbstract = new XMachO_Commands(disasmMode);
+            m_pDisasmAbstract = new XMachO_Commands(disasmMode);
         }
 
-        g_disasmMode = disasmMode;
-        g_disasmFamily = XBinary::getDisasmFamily(disasmMode);
+        m_disasmMode = disasmMode;
+        m_disasmFamily = XBinary::getDisasmFamily(disasmMode);
     }
 }
 
 void XDisasmCore::setSyntax(XBinary::SYNTAX syntax)
 {
-    if (g_syntax != syntax) {
-        g_syntax = syntax;
-        XBinary::DM disasmMode = g_disasmMode;
-        g_disasmMode = XBinary::DM_UNKNOWN;
+    if (m_syntax != syntax) {
+        m_syntax = syntax;
+        XBinary::DM disasmMode = m_disasmMode;
+        m_disasmMode = XBinary::DM_UNKNOWN;
         setMode(disasmMode);  // Reload
     }
 }
 
 void XDisasmCore::setOptions(XOptions *pOptions)
 {
-    g_pOptions = pOptions;
+    m_pOptions = pOptions;
     setSyntax(XBinary::stringToSyntaxId(pOptions->getValue(XOptions::ID_DISASM_SYNTAX).toString()));
 
-    g_mapColors = getColorRecordsMap(pOptions, g_disasmMode);
+    m_mapColors = getColorRecordsMap(pOptions, m_disasmMode);
 }
 
 XBinary::DMFAMILY XDisasmCore::getDisasmFamily()
 {
-    return g_disasmFamily;
+    return m_disasmFamily;
 }
 
 XBinary::SYNTAX XDisasmCore::getSyntax()
 {
-    return g_syntax;
+    return m_syntax;
 }
 
 QString XDisasmCore::getSignature(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress, ST signatureType, qint32 nCount)
@@ -137,9 +137,9 @@ QString XDisasmCore::getSignature(QIODevice *pDevice, XBinary::_MEMORY_MAP *pMem
                     }
                 }
 
-                if (XDisasmAbstract::isBranchOpcode(g_disasmFamily, _disasmResult.nOpcode)) {
+                if (XDisasmAbstract::isBranchOpcode(m_disasmFamily, _disasmResult.nOpcode)) {
                     // TODO another archs !!!
-                    if (g_disasmFamily == XBinary::DMFAMILY_X86) {
+                    if (m_disasmFamily == XBinary::DMFAMILY_X86) {
                         if (_disasmResult.nImmSize) {
                             sHEX = replaceWildChar(sHEX, _disasmResult.nImmOffset, _disasmResult.nImmSize, '$');
                         }
@@ -249,7 +249,7 @@ QString XDisasmCore::replaceWildChar(const QString &sString, qint32 nOffset, qin
 
 QString XDisasmCore::getNumberString(qint64 nValue)
 {
-    return XDisasmAbstract::getNumberString(nValue, g_disasmMode, g_syntax);
+    return XDisasmAbstract::getNumberString(nValue, m_disasmMode, m_syntax);
 }
 #ifdef QT_GUI_LIB
 void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDisasmAbstract::DISASM_RESULT &disasmResult)
@@ -273,7 +273,7 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
             qreal _dLeft = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, disasmResult.sMnemonic + " ").width();
             _rectOperands.setLeft(_rectOperands.left() + _dLeft);
 
-            if (!XDisasmAbstract::isNopOpcode(g_disasmFamily, disasmResult.nOpcode)) {
+            if (!XDisasmAbstract::isNopOpcode(m_disasmFamily, disasmResult.nOpcode)) {
                 QString sCurrent;
                 QRectF _rectCurrent = _rectOperands;
                 qint32 nNumberOfChars = disasmResult.sOperands.size();
@@ -287,7 +287,7 @@ void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDis
                         }
                         sCurrent = "";
 
-                        pPainter->drawText(_rectOperands, ch, g_qTextOptions);
+                        pPainter->drawText(_rectOperands, ch, m_qTextOptions);
                     } else {
                         sCurrent.append(ch);
                     }
@@ -326,25 +326,25 @@ void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString
     bool bXMMReg = false;
     bool bNumber = false;
 
-    if (XDisasmAbstract::isRef(g_disasmFamily, sOperand, g_syntax)) {
+    if (XDisasmAbstract::isRef(m_disasmFamily, sOperand, m_syntax)) {
         bRef = true;
-    } else if (XDisasmAbstract::isGeneralRegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isGeneralRegister(m_disasmFamily, sOperand, m_syntax)) {
         bGeneralReg = true;
-    } else if (XDisasmAbstract::isStackRegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isStackRegister(m_disasmFamily, sOperand, m_syntax)) {
         bStackReg = true;
-    } else if (XDisasmAbstract::isSegmentRegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isSegmentRegister(m_disasmFamily, sOperand, m_syntax)) {
         bSegmentReg = true;
-    } else if (XDisasmAbstract::isDebugRegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isDebugRegister(m_disasmFamily, sOperand, m_syntax)) {
         bDebugReg = true;
-    } else if (XDisasmAbstract::isInstructionPointerRegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isInstructionPointerRegister(m_disasmFamily, sOperand, m_syntax)) {
         bInstructionPointerReg = true;
-    } else if (XDisasmAbstract::isFlagsRegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isFlagsRegister(m_disasmFamily, sOperand, m_syntax)) {
         bFlagsReg = true;
-    } else if (XDisasmAbstract::isFPURegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isFPURegister(m_disasmFamily, sOperand, m_syntax)) {
         bFPUReg = true;
-    } else if (XDisasmAbstract::isXMMRegister(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isXMMRegister(m_disasmFamily, sOperand, m_syntax)) {
         bXMMReg = true;
-    } else if (XDisasmAbstract::isNumber(g_disasmFamily, sOperand, g_syntax)) {
+    } else if (XDisasmAbstract::isNumber(m_disasmFamily, sOperand, m_syntax)) {
         bNumber = true;
     }
 
@@ -396,7 +396,7 @@ void XDisasmCore::drawOperand(QPainter *pPainter, QRectF rectText, const QString
         pPainter->setPen(XOptions::stringToColor(colorRecord.sColorMain));
     }
 
-    pPainter->drawText(rectText, sOperand, g_qTextOptions);
+    pPainter->drawText(rectText, sOperand, m_qTextOptions);
 
     if (bSave) {
         pPainter->restore();
@@ -420,11 +420,11 @@ void XDisasmCore::drawColorText(QPainter *pPainter, const QRectF &rect, const QS
             pPainter->setPen(XOptions::stringToColor(colorRecord.sColorMain));
         }
 
-        pPainter->drawText(_rectString, sText, g_qTextOptions);
+        pPainter->drawText(_rectString, sText, m_qTextOptions);
 
         pPainter->restore();
     } else {
-        pPainter->drawText(rect, sText, g_qTextOptions);
+        pPainter->drawText(rect, sText, m_qTextOptions);
     }
 }
 #endif
@@ -432,23 +432,23 @@ XOptions::COLOR_RECORD XDisasmCore::getOpcodeColor(quint32 nOpcode)
 {
     XOptions::COLOR_RECORD result = {};
 
-    if (XDisasmAbstract::isCallOpcode(g_disasmFamily, nOpcode)) {
+    if (XDisasmAbstract::isCallOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_CALL);
-    } else if (XDisasmAbstract::isCondJumpOpcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isCondJumpOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_CONDJMP);
-    } else if (XDisasmAbstract::isRetOpcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isRetOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_RET);
-    } else if (XDisasmAbstract::isPushOpcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isPushOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_PUSH);
-    } else if (XDisasmAbstract::isPopOpcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isPopOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_POP);
-    } else if (XDisasmAbstract::isNopOpcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isNopOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_NOP);
-    } else if (XDisasmAbstract::isJumpOpcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isJumpOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_JMP);
-    } else if (XDisasmAbstract::isInt3Opcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isInt3Opcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_INT3);
-    } else if (XDisasmAbstract::isSyscallOpcode(g_disasmFamily, nOpcode)) {
+    } else if (XDisasmAbstract::isSyscallOpcode(m_disasmFamily, nOpcode)) {
         result = getColorRecord(XDisasmCore::OG_OPCODE_SYSCALL);
     }
 
@@ -525,12 +525,12 @@ QMap<XDisasmCore::OG, XOptions::COLOR_RECORD> XDisasmCore::getColorRecordsMap(XO
 
 XOptions::COLOR_RECORD XDisasmCore::getColorRecord(OG og)
 {
-    return g_mapColors.value(og);
+    return m_mapColors.value(og);
 }
 
 XDisasmAbstract::DISASM_RESULT XDisasmCore::disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
 {
-    QByteArray baData = XBinary::read_array(pDevice, nOffset, g_nOpcodeSize);
+    QByteArray baData = XBinary::read_array(pDevice, nOffset, m_nOpcodeSize);
 
     return disAsm(baData.data(), baData.size(), nAddress, disasmOptions);
 }
@@ -540,8 +540,8 @@ QList<XDisasmAbstract::DISASM_RESULT> XDisasmCore::disAsmList(char *pData, qint3
 {
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
-    if (g_pDisasmAbstract) {
-        listResult = g_pDisasmAbstract->_disasm(pData, nDataSize, nAddress, disasmOptions, nLimit, pPdStruct);
+    if (m_pDisasmAbstract) {
+        listResult = m_pDisasmAbstract->_disasm(pData, nDataSize, nAddress, disasmOptions, nLimit, pPdStruct);
     }
 
     return listResult;
@@ -551,7 +551,7 @@ XDisasmAbstract::DISASM_RESULT XDisasmCore::disAsm(char *pData, qint32 nDataSize
 {
     XDisasmAbstract::DISASM_RESULT result = {};
 
-    if (g_pDisasmAbstract) {
+    if (m_pDisasmAbstract) {
         QList<XDisasmAbstract::DISASM_RESULT> list = disAsmList(pData, nDataSize, nAddress, disasmOptions, 1);
 
         if (list.count()) {
