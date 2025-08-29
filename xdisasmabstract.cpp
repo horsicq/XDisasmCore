@@ -116,11 +116,11 @@ bool XDisasmAbstract::isJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_ARM) {
-        if (nOpcodeID == ARM_INS_B) {
+    if ((nOpcodeID == ARM_INS_B) || (nOpcodeID == ARM_INS_BX)) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
-        if (nOpcodeID == ARM64_INS_B) {
+    if ((nOpcodeID == ARM64_INS_B) || (nOpcodeID == ARM64_INS_BR)) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_BPF) {
@@ -132,7 +132,7 @@ bool XDisasmAbstract::isJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_MIPS) {
-        if ((nOpcodeID == MIPS_INS_J) || (nOpcodeID == MIPS_INS_JAL)) {
+    if (nOpcodeID == MIPS_INS_J) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_MOS65XX) {
@@ -140,7 +140,7 @@ bool XDisasmAbstract::isJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_M68K) {
-        if (nOpcodeID == M68K_INS_BRA) {
+    if ((nOpcodeID == M68K_INS_BRA) || (nOpcodeID == M68K_INS_JMP)) {
             bResult = true;
         }
     }
