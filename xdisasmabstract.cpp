@@ -155,27 +155,36 @@ bool XDisasmAbstract::isRetOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if ((nOpcodeID == X86_INS_RET) || (nOpcodeID == X86_INS_RETF) || (nOpcodeID == X86_INS_RETFQ)) {
+        if ((nOpcodeID == X86_INS_RET) || (nOpcodeID == X86_INS_RETF) || (nOpcodeID == X86_INS_RETFQ) || (nOpcodeID == X86_INS_IRET) ||
+            (nOpcodeID == X86_INS_IRETD) || (nOpcodeID == X86_INS_IRETQ)) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
-        if (nOpcodeID == ARM64_INS_RET) {
+        if ((nOpcodeID == ARM64_INS_RET) || (nOpcodeID == ARM64_INS_RETAA) || (nOpcodeID == ARM64_INS_RETAB)) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_BPF) {
-        if (nOpcodeID == BPF_INS_RET) {
+        if ((nOpcodeID == BPF_INS_RET) || (nOpcodeID == BPF_INS_EXIT)) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_SPARC) {
-        if (nOpcodeID == SPARC_INS_RET) {
+        if ((nOpcodeID == SPARC_INS_RET) || (nOpcodeID == SPARC_INS_RETL)) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_MIPS) {
-        if (nOpcodeID == MIPS_INS_JR) {
+        if ((nOpcodeID == MIPS_INS_JR) || (nOpcodeID == MIPS_INS_ERET)) {  // JR ra or exception return
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_MOS65XX) {
+        if ((nOpcodeID == MOS65XX_INS_RTS) || (nOpcodeID == MOS65XX_INS_RTI)) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_M68K) {
         if ((nOpcodeID == M68K_INS_RTS) || (nOpcodeID == M68K_INS_RTE) || (nOpcodeID == M68K_INS_RTR) || (nOpcodeID == M68K_INS_RTD)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_PPC) {
+        if (nOpcodeID == PPC_INS_BLR) {  // Branch to link register (return)
             bResult = true;
         }
     }
