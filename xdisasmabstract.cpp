@@ -254,6 +254,42 @@ bool XDisasmAbstract::isCallOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
         if (nOpcodeID == X86_INS_CALL) {
             bResult = true;
         }
+    } else if (dmFamily == XBinary::DMFAMILY_ARM) {
+        if ((nOpcodeID == ARM_INS_BL) || (nOpcodeID == ARM_INS_BLX)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
+        if ((nOpcodeID == ARM64_INS_BL) || (nOpcodeID == ARM64_INS_BLR)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_MIPS) {
+        if ((nOpcodeID == MIPS_INS_JAL) || (nOpcodeID == MIPS_INS_JALR)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_SPARC) {
+        if ((nOpcodeID == SPARC_INS_CALL) || (nOpcodeID == SPARC_INS_JMPL)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_MOS65XX) {
+        if (nOpcodeID == MOS65XX_INS_JSR) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_M68K) {
+        if ((nOpcodeID == M68K_INS_BSR) || (nOpcodeID == M68K_INS_JSR)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_PPC) {
+        if ((nOpcodeID == PPC_INS_BL) || (nOpcodeID == PPC_INS_BLA)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_BPF) {
+        if (nOpcodeID == BPF_INS_CALL) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_WASM) {
+        if (nOpcodeID == WASM_INS_CALL) {
+            bResult = true;
+        }
     }
     // TODO Other archs
 
