@@ -198,7 +198,22 @@ bool XDisasmAbstract::isPushOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (nOpcodeID == X86_INS_PUSH) {
+        if ((nOpcodeID == X86_INS_PUSH) || (nOpcodeID == X86_INS_PUSHF) || (nOpcodeID == X86_INS_PUSHFD) || (nOpcodeID == X86_INS_PUSHFQ)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_ARM) {
+        // PUSH exists for ARM Thumb; classic ARM uses STMDB SP! which Capstone decodes differently
+        if (nOpcodeID == ARM_INS_PUSH) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_M68K) {
+        // PEA pushes effective address onto the stack
+        if (nOpcodeID == M68K_INS_PEA) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_MOS65XX) {
+        // 6502 push instructions
+        if ((nOpcodeID == MOS65XX_INS_PHA) || (nOpcodeID == MOS65XX_INS_PHP)) {
             bResult = true;
         }
     }
@@ -212,7 +227,17 @@ bool XDisasmAbstract::isPopOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (nOpcodeID == X86_INS_POP) {
+        if ((nOpcodeID == X86_INS_POP) || (nOpcodeID == X86_INS_POPF) || (nOpcodeID == X86_INS_POPFD) || (nOpcodeID == X86_INS_POPFQ)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_ARM) {
+        // POP exists for ARM Thumb
+        if (nOpcodeID == ARM_INS_POP) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_MOS65XX) {
+        // 6502/65xx pull instructions
+        if ((nOpcodeID == MOS65XX_INS_PLA) || (nOpcodeID == MOS65XX_INS_PLX) || (nOpcodeID == MOS65XX_INS_PLY) || (nOpcodeID == MOS65XX_INS_PLP)) {
             bResult = true;
         }
     }
