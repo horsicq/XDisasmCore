@@ -35,10 +35,10 @@ public:
                                          XBinary::PDSTRUCT *pPdStruct);
 
 private:
-    csh g_handle;
-    XBinary::DM g_disasmMode;
-    XBinary::DMFAMILY g_disasmFamily;
-    XBinary::SYNTAX g_syntax;
+    csh m_handle;
+    XBinary::DM m_disasmMode;
+    XBinary::DMFAMILY m_disasmFamily;
+    XBinary::SYNTAX m_syntax;
 };
 
 #endif  // CAPSTONE_BRIDGE_H
