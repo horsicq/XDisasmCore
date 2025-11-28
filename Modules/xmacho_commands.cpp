@@ -23,7 +23,7 @@
 
 XMachO_Commands::XMachO_Commands(XBinary::DM disasmMode, QObject *pParent) : XDisasmAbstract(pParent)
 {
-    g_disasmMode = disasmMode;
+    m_disasmMode = disasmMode;
 }
 
 quint64 XMachO_Commands::_handleULEB128(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const DISASM_OPTIONS &disasmOptions, const QString &sPrefix)
@@ -77,7 +77,7 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
     state.nMaxSize = nDataSize;
     state.nAddress = nAddress;
 
-    if (g_disasmMode == XBinary::DM_CUSTOM_MACH_EXPORT) {
+    if (m_disasmMode == XBinary::DM_CUSTOM_MACH_EXPORT) {
         while (!(state.bIsStop) && XBinary::isPdStructNotCanceled(pPdStruct)) {
             quint64 nTerminalSize = _handleULEB128(&listResult, pData, &state, disasmOptions, "TERMINAL_SIZE");
 
@@ -97,7 +97,7 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
                 state.bIsStop = true;
             }
         }
-    } else if ((g_disasmMode == XBinary::DM_CUSTOM_MACH_REBASE) || (g_disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (g_disasmMode == XBinary::DM_CUSTOM_MACH_WEAK)) {
+    } else if ((m_disasmMode == XBinary::DM_CUSTOM_MACH_REBASE) || (m_disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (m_disasmMode == XBinary::DM_CUSTOM_MACH_WEAK)) {
         while (!(state.bIsStop)) {
             quint8 nOpcode = XBinary::_read_uint8(pData + state.nCurrentOffset);
 
@@ -108,7 +108,7 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
 
             QString sMnemonic;
 
-            if (g_disasmMode == XBinary::DM_CUSTOM_MACH_REBASE) {
+            if (m_disasmMode == XBinary::DM_CUSTOM_MACH_REBASE) {
                 switch (nOpcode & XMACH_DEF::S_REBASE_OPCODE_MASK) {
                     case XMACH_DEF::S_REBASE_OPCODE_SET_TYPE_IMM:
                         sMnemonic = QString("SET_TYPE_IMM");
@@ -151,7 +151,7 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
                             state.bIsStop = true;
                         }
                 }
-            } else if ((g_disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (g_disasmMode == XBinary::DM_CUSTOM_MACH_WEAK)) {
+            } else if ((m_disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (m_disasmMode == XBinary::DM_CUSTOM_MACH_WEAK)) {
                 switch (nOpcode & XMACH_DEF::S_BIND_OPCODE_MASK) {
                     case XMACH_DEF::S_BIND_OPCODE_SET_DYLIB_ORDINAL_IMM:
                         sMnemonic = QString("SET_DYLIB_ORDINAL_IMM");
@@ -220,9 +220,9 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
 
             if (!state.bIsStop) {
                 if (bImm) {
-                    if (g_disasmMode == XBinary::DM_CUSTOM_MACH_REBASE) {
+                    if (m_disasmMode == XBinary::DM_CUSTOM_MACH_REBASE) {
                         sString = XBinary::appendText(sString, QString::number(nOpcode & XMACH_DEF::S_REBASE_IMMEDIATE_MASK, 16), ", ");
-                    } else if ((g_disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (g_disasmMode == XBinary::DM_CUSTOM_MACH_WEAK)) {
+                    } else if ((m_disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (m_disasmMode == XBinary::DM_CUSTOM_MACH_WEAK)) {
                         sString = XBinary::appendText(sString, QString::number(nOpcode & XMACH_DEF::S_BIND_IMMEDIATE_MASK, 16), ", ");
                     }
                 }

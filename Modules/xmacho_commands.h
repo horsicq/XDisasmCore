@@ -40,7 +40,7 @@ private:
                               const QString &sPrefix);
 
 private:
-    XBinary::DM g_disasmMode;
+    XBinary::DM m_disasmMode;
 };
 
 #endif  // XMACHO_COMMANDS_H
