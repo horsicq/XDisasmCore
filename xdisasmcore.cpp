@@ -87,6 +87,11 @@ XBinary::DMFAMILY XDisasmCore::getDisasmFamily()
     return m_disasmFamily;
 }
 
+XBinary::DM XDisasmCore::getDisasmMode()
+{
+    return m_disasmMode;
+}
+
 XBinary::SYNTAX XDisasmCore::getSyntax()
 {
     return m_syntax;

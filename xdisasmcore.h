@@ -90,6 +90,7 @@ public:
     void setOptions(XOptions *pOptions);
 
     XBinary::DMFAMILY getDisasmFamily();
+    XBinary::DM getDisasmMode();
 
     XDisasmAbstract::DISASM_RESULT disAsm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     XDisasmAbstract::DISASM_RESULT disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
