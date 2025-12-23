@@ -517,8 +517,8 @@ QMap<XDisasmCore::OG, XOptions::COLOR_RECORD> XDisasmCore::getColorRecordsMap(XO
         // TODO
     } else if ((dmFamily == XBinary::DMFAMILY_ARM) || (dmFamily == XBinary::DMFAMILY_ARM64)) {
         mapResult.insert(XDisasmCore::OG_REGS_GENERAL, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_REGS_GENERAL));
-        mapResult.insert(XDisasmCore::OG_OPCODE_JMP, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_OPCODE_B));
-        mapResult.insert(XDisasmCore::OG_OPCODE_CALL, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_OPCODE_BL));
+        mapResult.insert(XDisasmCore::OG_OPCODE_JMP, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_OPCODE_BRANCH));
+        mapResult.insert(XDisasmCore::OG_OPCODE_CALL, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_OPCODE_BRANCHLINK));
         mapResult.insert(XDisasmCore::OG_OPCODE_RET, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_OPCODE_RET));
         mapResult.insert(XDisasmCore::OG_OPCODE_PUSH, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_OPCODE_PUSH));
         mapResult.insert(XDisasmCore::OG_OPCODE_POP, getColorRecord(pOptions, XOptions::ID_DISASM_COLOR_ARM_OPCODE_POP));
