@@ -458,15 +458,13 @@ bool XDisasmAbstract::isStackRegister(XBinary::DMFAMILY dmFamily, const QString 
 
 bool XDisasmAbstract::isSegmentRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax)
 {
-    Q_UNUSED(syntax)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
         QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
 
         if (_sRegister != "") {
-            if ((sRegister == "es") || (sRegister == "gs") || (sRegister == "ss") || (sRegister == "ds") || (sRegister == "cs") || (sRegister == "fs")) {
+            if ((_sRegister == "es") || (_sRegister == "gs") || (_sRegister == "ss") || (_sRegister == "ds") || (_sRegister == "cs") || (_sRegister == "fs")) {
                 bResult = true;
             } else {
                 bResult = false;
