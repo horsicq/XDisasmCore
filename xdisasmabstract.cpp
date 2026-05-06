@@ -55,7 +55,7 @@ QString XDisasmAbstract::getOpcodeFullString(const DISASM_RESULT &disasmResult)
 {
     QString sResult = disasmResult.sMnemonic;
 
-    if (disasmResult.sOperands != "") {
+    if (!disasmResult.sOperands.isEmpty()) {
         sResult += " " + disasmResult.sOperands;
     }
 
@@ -348,30 +348,14 @@ bool XDisasmAbstract::isNopOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 
 bool XDisasmAbstract::isInt3Opcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 {
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (nOpcodeID == X86_INS_INT3) {
-            bResult = true;
-        }
-    }
     // TODO Other archs
-
-    return bResult;
+    return (dmFamily == XBinary::DMFAMILY_X86) && (nOpcodeID == X86_INS_INT3);
 }
 
 bool XDisasmAbstract::isSyscallOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 {
-    bool bResult = false;
-
-    if (dmFamily == XBinary::DMFAMILY_X86) {
-        if (nOpcodeID == X86_INS_SYSCALL) {
-            bResult = true;
-        }
-    }
     // TODO Other archs
-
-    return bResult;
+    return (dmFamily == XBinary::DMFAMILY_X86) && (nOpcodeID == X86_INS_SYSCALL);
 }
 
 bool XDisasmAbstract::isGeneralRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax)
@@ -411,21 +395,9 @@ bool XDisasmAbstract::isGeneralRegister(XBinary::DMFAMILY dmFamily, const QStrin
             }
         }
     } else if (dmFamily == XBinary::DMFAMILY_ARM) {
-        qint32 nSize = sRegister.size();
-
-        if (nSize >= 2) {
-            if (sRegister.at(0) == QChar('r')) {
-                bResult = true;
-            }
-        }
+        bResult = (sRegister.size() >= 2) && (sRegister.at(0) == QChar('r'));
     } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
-        qint32 nSize = sRegister.size();
-
-        if (nSize >= 2) {
-            if (sRegister.at(0) == QChar('x')) {
-                bResult = true;
-            }
-        }
+        bResult = (sRegister.size() >= 2) && (sRegister.at(0) == QChar('x'));
     }
     // TODO Other archs
 
@@ -437,14 +409,10 @@ bool XDisasmAbstract::isStackRegister(XBinary::DMFAMILY dmFamily, const QString 
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
+        const QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
 
-        if (_sRegister != "") {
-            if ((_sRegister == "sp") || (_sRegister == "bp") || (_sRegister == "esp") || (_sRegister == "ebp") || (_sRegister == "rsp") || (_sRegister == "rbp")) {
-                bResult = true;
-            } else {
-                bResult = false;
-            }
+        if (!_sRegister.isEmpty()) {
+            bResult = (_sRegister == "sp") || (_sRegister == "bp") || (_sRegister == "esp") || (_sRegister == "ebp") || (_sRegister == "rsp") || (_sRegister == "rbp");
         }
     } else if ((dmFamily == XBinary::DMFAMILY_ARM) || (dmFamily == XBinary::DMFAMILY_ARM64)) {
         if (sRegister == "sp") {
@@ -461,14 +429,10 @@ bool XDisasmAbstract::isSegmentRegister(XBinary::DMFAMILY dmFamily, const QStrin
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
+        const QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
 
-        if (_sRegister != "") {
-            if ((_sRegister == "es") || (_sRegister == "gs") || (_sRegister == "ss") || (_sRegister == "ds") || (_sRegister == "cs") || (_sRegister == "fs")) {
-                bResult = true;
-            } else {
-                bResult = false;
-            }
+        if (!_sRegister.isEmpty()) {
+            bResult = (_sRegister == "es") || (_sRegister == "gs") || (_sRegister == "ss") || (_sRegister == "ds") || (_sRegister == "cs") || (_sRegister == "fs");
         }
     }
     // TODO Other archs
@@ -550,20 +514,10 @@ bool XDisasmAbstract::isXMMRegister(XBinary::DMFAMILY dmFamily, const QString &s
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        qint32 nSize = sRegister.size();
-
         if (syntax == XBinary::SYNTAX_ATT) {
-            if (nSize >= 5) {
-                if (sRegister.left(4) == "%xmm") {
-                    bResult = true;
-                }
-            }
+            bResult = sRegister.startsWith(QLatin1String("%xmm"));
         } else {
-            if (nSize >= 4) {
-                if (sRegister.left(3) == "xmm") {
-                    bResult = true;
-                }
-            }
+            bResult = sRegister.startsWith(QLatin1String("xmm"));
         }
     }
 
@@ -579,16 +533,10 @@ bool XDisasmAbstract::isRegister(XBinary::DMFAMILY dmFamily, const QString &sReg
 
 bool XDisasmAbstract::isRef(XBinary::DMFAMILY dmFamily, const QString &sOperand, XBinary::SYNTAX syntax)
 {
-    bool bResult = false;
-
     Q_UNUSED(dmFamily)
     Q_UNUSED(syntax)
 
-    if (sOperand.contains("<")) {
-        bResult = true;
-    }
-
-    return bResult;
+    return sOperand.contains(QChar('<'));
 }
 
 bool XDisasmAbstract::isNumber(XBinary::DMFAMILY dmFamily, const QString &sNumber, XBinary::SYNTAX syntax)

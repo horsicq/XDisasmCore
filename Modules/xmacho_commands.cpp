@@ -50,13 +50,13 @@ quint64 XMachO_Commands::_handleULEB128(QList<DISASM_RESULT> *pListResults, char
 QString XMachO_Commands::_handleAnsiString(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const DISASM_OPTIONS &disasmOptions, const QString &sPrefix)
 {
     if (pState->bIsStop) {
-        return 0;
+        return {};
     }
 
     qint64 nMaxSize = qMin(pState->nMaxSize - pState->nCurrentOffset, (qint64)256);
     QString sResult = XBinary::_read_ansiString(pData + pState->nCurrentOffset, nMaxSize);
 
-    if (sResult != "") {
+    if (!sResult.isEmpty()) {
         _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, sResult.size() + 1, sPrefix, sResult, pState, disasmOptions);
     } else {
         pState->bIsStop = true;
@@ -71,8 +71,6 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
     STATE state = {};
-    state.nCurrentCount = 0;
-    state.nCurrentOffset = 0;
     state.nLimit = nLimit;
     state.nMaxSize = nDataSize;
     state.nAddress = nAddress;

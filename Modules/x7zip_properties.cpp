@@ -216,7 +216,7 @@ quint32 X7Zip_Properties::_handleUINT32(QList<DISASM_RESULT> *pListResults, char
 QByteArray X7Zip_Properties::_handleArray(QList<DISASM_RESULT> *pListResults, char *pData, qint32 nDataSize, STATE *pState, const DISASM_OPTIONS &disasmOptions)
 {
     if (pState->bIsStop) {
-        return 0;
+        return {};
     }
 
     QByteArray baResult;
@@ -240,8 +240,6 @@ QList<XDisasmAbstract::DISASM_RESULT> X7Zip_Properties::_disasm(char *pData, qin
     QList<XDisasmAbstract::DISASM_RESULT> listResult;
 
     STATE state = {};
-    state.nCurrentCount = 0;
-    state.nCurrentOffset = 0;
     state.nLimit = nLimit;
     state.nMaxSize = nDataSize;
     state.nAddress = nAddress;
