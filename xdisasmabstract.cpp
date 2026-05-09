@@ -29,7 +29,7 @@ QString XDisasmAbstract::getNumberString(qint64 nValue, XBinary::DM disasmMode, 
 {
     QString sResult;
 
-    if ((disasmMode == XBinary::DM_X86_16) || (disasmMode == XBinary::DM_X86_32) || (disasmMode == XBinary::DM_X86_64)) {
+    if ((disasmMode == XBinary::DM_8086) || (disasmMode == XBinary::DM_X86_32) || (disasmMode == XBinary::DM_X86_64)) {
         if (nValue < 0) {
             sResult += "- ";
         }
