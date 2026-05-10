@@ -38,7 +38,7 @@ public:
         qint64 nCurrentOffset;
     };
 
-    enum RELTYPE {
+    enum RELTYPE : quint32 {
         RELTYPE_NONE = 0,
         RELTYPE_ALL,
         RELTYPE_JMP = 0x10,
@@ -47,7 +47,7 @@ public:
         RELTYPE_CALL = 0x20
     };
 
-    enum MEMTYPE {
+    enum MEMTYPE : quint32 {
         MEMTYPE_NONE = 0,
         MEMTYPE_READ,
         MEMTYPE_WRITE,
@@ -84,7 +84,7 @@ public:
         bool bNoStrings;
     };
 
-    enum REGS {
+    enum REGS : quint32 {
         REGS_UNKNOWN = 0,
         REGS_GENERAL,
         REGS_FPU,
@@ -97,6 +97,7 @@ public:
     };
 
     explicit XDisasmAbstract(QObject *pParent = nullptr);
+    virtual ~XDisasmAbstract() = default;
     virtual QList<DISASM_RESULT> _disasm(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions, qint32 nLimit,
                                          XBinary::PDSTRUCT *pPdStruct) = 0;
 

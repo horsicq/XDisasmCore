@@ -21,6 +21,8 @@
 
 #include "x7zip_properties.h"
 
+#include <limits>
+
 X7Zip_Properties::X7Zip_Properties(QObject *pParent) : XDisasmAbstract(pParent)
 {
 }
@@ -213,23 +215,22 @@ quint32 X7Zip_Properties::_handleUINT32(QList<DISASM_RESULT> *pListResults, char
     return nResult;
 }
 
-QByteArray X7Zip_Properties::_handleArray(QList<DISASM_RESULT> *pListResults, char *pData, qint32 nDataSize, STATE *pState, const DISASM_OPTIONS &disasmOptions)
+void X7Zip_Properties::_handleArray(QList<DISASM_RESULT> *pListResults, char *pData, quint64 nDataSize, STATE *pState, const DISASM_OPTIONS &disasmOptions)
 {
     if (pState->bIsStop) {
-        return {};
+        return;
     }
 
-    QByteArray baResult;
+    const qint64 nRemainingSize = pState->nMaxSize - pState->nCurrentOffset;
 
-    if (pState->nCurrentOffset + nDataSize <= pState->nMaxSize) {
-        baResult = XBinary::_read_byteArray(pData + pState->nCurrentOffset, nDataSize);
+    if ((nRemainingSize >= 0) && (nDataSize <= (quint64)nRemainingSize) && (nDataSize <= (quint64)(std::numeric_limits<qint32>::max)())) {
+        const qint32 nArraySize = (qint32)nDataSize;
+        QByteArray baResult = XBinary::_read_byteArray(pData + pState->nCurrentOffset, nArraySize);
 
-        _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, nDataSize, "ARRAY", baResult.toHex(), pState, disasmOptions);
+        _addDisasmResult(pListResults, pState->nAddress + pState->nCurrentOffset, nArraySize, "ARRAY", baResult.toHex(), pState, disasmOptions);
     } else {
         pState->bIsStop = true;
     }
-
-    return baResult;
 }
 
 QList<XDisasmAbstract::DISASM_RESULT> X7Zip_Properties::_disasm(char *pData, qint32 nDataSize, XADDR nAddress, const DISASM_OPTIONS &disasmOptions, qint32 nLimit,

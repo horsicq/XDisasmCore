@@ -39,7 +39,7 @@ private:
     quint64 _handleNumber(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     quint8 _handleByte(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
     quint32 _handleUINT32(QList<DISASM_RESULT> *pListResults, char *pData, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
-    QByteArray _handleArray(QList<DISASM_RESULT> *pListResults, char *pData, qint32 nDataSize, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
+    void _handleArray(QList<DISASM_RESULT> *pListResults, char *pData, quint64 nDataSize, STATE *pState, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions);
 };
 
 #endif  // X7ZIP_PROPERTIES_H

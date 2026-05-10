@@ -509,8 +509,6 @@ bool XDisasmAbstract::isFPURegister(XBinary::DMFAMILY dmFamily, const QString &s
 
 bool XDisasmAbstract::isXMMRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax)
 {
-    Q_UNUSED(syntax)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
@@ -586,7 +584,7 @@ QString XDisasmAbstract::removeRegPrefix(XBinary::DMFAMILY dmFamily, const QStri
         if (syntax == XBinary::SYNTAX_ATT) {
             qint32 nSize = sRegister.size();
 
-            sResult = "";
+            sResult.clear();
 
             if (nSize >= 2) {
                 if (sRegister.at(0) == QChar('%')) {
