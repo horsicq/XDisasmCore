@@ -536,8 +536,13 @@ XOptions::COLOR_RECORD XDisasmCore::getColorRecord(OG og)
 XDisasmAbstract::DISASM_RESULT XDisasmCore::disAsm(QIODevice *pDevice, qint64 nOffset, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions)
 {
     QByteArray baData = XBinary::read_array(pDevice, nOffset, m_nOpcodeSize);
+    
+    int nRealSize = baData.size();
 
-    return disAsm(baData.data(), baData.size(), nAddress, disasmOptions);
+    // WORKAROUND: Pad with 16 bytes to prevent Capstone lookahead.
+    baData.append(16, '\0');
+
+    return disAsm(baData.data(), nRealSize, nAddress, disasmOptions);
 }
 
 QList<XDisasmAbstract::DISASM_RESULT> XDisasmCore::disAsmList(char *pData, qint32 nDataSize, XADDR nAddress, const XDisasmAbstract::DISASM_OPTIONS &disasmOptions,
