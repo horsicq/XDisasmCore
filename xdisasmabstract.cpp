@@ -82,7 +82,7 @@ void XDisasmAbstract::_addDisasmResult(QList<DISASM_RESULT> *pListResults, DISAS
         pState->nCurrentOffset += disasmResult.nSize;
     }
 
-    if ((pState->nLimit > 0) && (pState->nCurrentCount > pState->nLimit)) {
+    if ((pState->nLimit > 0) && (pState->nCurrentCount >= pState->nLimit)) {
         pState->bIsStop = true;
     } else if (pState->nCurrentOffset >= pState->nMaxSize) {
         pState->bIsStop = true;
@@ -141,6 +141,14 @@ bool XDisasmAbstract::isJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID
         }
     } else if (dmFamily == XBinary::DMFAMILY_M68K) {
         if ((nOpcodeID == M68K_INS_BRA) || (nOpcodeID == M68K_INS_JMP)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_PPC) {
+        if ((nOpcodeID == PPC_INS_B) || (nOpcodeID == PPC_INS_BA)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_WASM) {
+        if (nOpcodeID == WASM_INS_BR) {
             bResult = true;
         }
     }
@@ -308,7 +316,23 @@ bool XDisasmAbstract::isCondJumpOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpco
             (nOpcodeID == X86_INS_LOOPE) || (nOpcodeID == X86_INS_LOOPNE)) {
             bResult = true;
         }
+    } else if (dmFamily == XBinary::DMFAMILY_MIPS) {
+        if ((nOpcodeID == MIPS_INS_BEQ) || (nOpcodeID == MIPS_INS_BNE) || (nOpcodeID == MIPS_INS_BGEZ) || (nOpcodeID == MIPS_INS_BGTZ) ||
+            (nOpcodeID == MIPS_INS_BLEZ) || (nOpcodeID == MIPS_INS_BLTZ)) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_PPC) {
+        if (nOpcodeID == PPC_INS_BC) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_BPF) {
+        if ((nOpcodeID == BPF_INS_JEQ) || (nOpcodeID == BPF_INS_JNE) || (nOpcodeID == BPF_INS_JGT) || (nOpcodeID == BPF_INS_JGE) || (nOpcodeID == BPF_INS_JLT) ||
+            (nOpcodeID == BPF_INS_JLE) || (nOpcodeID == BPF_INS_JSET) || (nOpcodeID == BPF_INS_JSGT) || (nOpcodeID == BPF_INS_JSGE)) {
+            bResult = true;
+        }
     }
+    // TODO ARM/ARM64 condition codes live in cs_detail (arm.cc/arm64.cc), not the opcode id; and emitting
+    // RELTYPE_JMP_COND + nXrefToRelative for these families also needs per-arch operand extraction in Capstone_Bridge.
 
     return bResult;
 }
@@ -319,6 +343,14 @@ bool XDisasmAbstract::isNopOpcode(XBinary::DMFAMILY dmFamily, quint32 nOpcodeID)
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
         if (nOpcodeID == X86_INS_NOP) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_ARM) {
+        if (nOpcodeID == ARM_INS_NOP) {
+            bResult = true;
+        }
+    } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
+        if (nOpcodeID == ARM64_INS_NOP) {
             bResult = true;
         }
     } else if (dmFamily == XBinary::DMFAMILY_M68K) {
@@ -397,7 +429,8 @@ bool XDisasmAbstract::isGeneralRegister(XBinary::DMFAMILY dmFamily, const QStrin
     } else if (dmFamily == XBinary::DMFAMILY_ARM) {
         bResult = (sRegister.size() >= 2) && (sRegister.at(0) == QChar('r'));
     } else if (dmFamily == XBinary::DMFAMILY_ARM64) {
-        bResult = (sRegister.size() >= 2) && (sRegister.at(0) == QChar('x'));
+        // Accept both the 64-bit ('x') and 32-bit ('w') general-register views (covers xzr/wzr).
+        bResult = (sRegister.size() >= 2) && ((sRegister.at(0) == QChar('x')) || (sRegister.at(0) == QChar('w')));
     }
     // TODO Other archs
 
@@ -442,13 +475,14 @@ bool XDisasmAbstract::isSegmentRegister(XBinary::DMFAMILY dmFamily, const QStrin
 
 bool XDisasmAbstract::isDebugRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax)
 {
-    Q_UNUSED(syntax)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if ((sRegister == "dr0") || (sRegister == "dr1") || (sRegister == "dr2") || (sRegister == "dr3") || (sRegister == "dr6") || (sRegister == "dr7")) {
-            bResult = true;
+        const QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
+
+        if (!_sRegister.isEmpty()) {
+            bResult = (_sRegister == "dr0") || (_sRegister == "dr1") || (_sRegister == "dr2") || (_sRegister == "dr3") || (_sRegister == "dr6") ||
+                      (_sRegister == "dr7");
         }
     }
     // TODO Other archs
@@ -458,13 +492,13 @@ bool XDisasmAbstract::isDebugRegister(XBinary::DMFAMILY dmFamily, const QString 
 
 bool XDisasmAbstract::isInstructionPointerRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax)
 {
-    Q_UNUSED(syntax)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if ((sRegister == "ip") || (sRegister == "eip") || (sRegister == "rip")) {
-            bResult = true;
+        const QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
+
+        if (!_sRegister.isEmpty()) {
+            bResult = (_sRegister == "ip") || (_sRegister == "eip") || (_sRegister == "rip");
         }
     } else if ((dmFamily == XBinary::DMFAMILY_ARM) || (dmFamily == XBinary::DMFAMILY_ARM64)) {
         if (sRegister == "pc") {
@@ -478,13 +512,13 @@ bool XDisasmAbstract::isInstructionPointerRegister(XBinary::DMFAMILY dmFamily, c
 
 bool XDisasmAbstract::isFlagsRegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax)
 {
-    Q_UNUSED(syntax)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        if ((sRegister == "flags") || (sRegister == "eflags") || (sRegister == "rflags")) {
-            bResult = true;
+        const QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
+
+        if (!_sRegister.isEmpty()) {
+            bResult = (_sRegister == "flags") || (_sRegister == "eflags") || (_sRegister == "rflags");
         }
     }
     // TODO Other archs
@@ -494,13 +528,21 @@ bool XDisasmAbstract::isFlagsRegister(XBinary::DMFAMILY dmFamily, const QString 
 
 bool XDisasmAbstract::isFPURegister(XBinary::DMFAMILY dmFamily, const QString &sRegister, XBinary::SYNTAX syntax)
 {
-    Q_UNUSED(syntax)
-    Q_UNUSED(sRegister)
-
     bool bResult = false;
 
     if (dmFamily == XBinary::DMFAMILY_X86) {
-        // TODO
+        const QString _sRegister = removeRegPrefix(dmFamily, sRegister, syntax);
+
+        if (!_sRegister.isEmpty()) {
+            // The GUI operand tokenizer splits on '(' / ')', so an Intel operand "st(0)" arrives here as bare "st".
+            // Also accept the whole-operand forms st(0..7) (from isRegister callers) and the un-parenthesized st0..st7.
+            bResult = (_sRegister == "st") || (_sRegister.startsWith(QLatin1String("st(")) && _sRegister.endsWith(QChar(')')));
+
+            if (!bResult && (_sRegister.size() == 3) && _sRegister.startsWith(QLatin1String("st"))) {
+                const QChar cLast = _sRegister.at(2);
+                bResult = (cLast >= QChar('0')) && (cLast <= QChar('7'));
+            }
+        }
     }
     // TODO Other archs
 

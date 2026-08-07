@@ -49,6 +49,12 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
     state.nMaxSize = nDataSize;
     state.nAddress = nAddress;
 
+    if (m_handle == 0) {
+        // The disassembler failed to initialize (unsupported/misconfigured mode). Return an empty
+        // list instead of emitting the whole buffer as a stream of bogus 'db' bytes.
+        return listResult;
+    }
+
     while (XBinary::isPdStructNotCanceled(pPdStruct) && (!(state.bIsStop))) {
         XDisasmAbstract::DISASM_RESULT result = {};
         result.nAddress = nAddress;
@@ -57,7 +63,16 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
 
         // cs_reg_name
 
-        quint64 nNumberOfOpcodes = cs_disasm(m_handle, (uint8_t *)pData, nDataSize, nAddress, 1, &pInsn);
+        // pData advances by result.nSize each iteration while nDataSize stays constant, so the number of
+        // valid bytes remaining is (nDataSize - state.nCurrentOffset). Passing the stale full nDataSize would
+        // tell Capstone the buffer is larger than it is and let it read past the caller's buffer end.
+        qint32 nRemaining = nDataSize - (qint32)state.nCurrentOffset;
+
+        if (nRemaining <= 0) {
+            break;
+        }
+
+        quint64 nNumberOfOpcodes = cs_disasm(m_handle, (uint8_t *)pData, nRemaining, nAddress, 1, &pInsn);
 
         if (nNumberOfOpcodes > 0) {
             result.bIsValid = true;
@@ -201,13 +216,15 @@ QList<XDisasmAbstract::DISASM_RESULT> Capstone_Bridge::_disasm(char *pData, qint
             cs_free(pInsn, nNumberOfOpcodes);
         } else {
             if (cs_errno(m_handle) == CS_ERR_MEM) {
-                state.bIsStop = true;
+                // Not enough bytes remain to decode a full instruction: stop cleanly at the memory
+                // boundary rather than fabricating a bogus 'db'/'Invalid opcode' for the truncated tail.
                 result.bMemError = true;
-            }
-
-            if (m_disasmFamily == XBinary::DMFAMILY_ARM) {
+                state.bIsStop = true;
+            } else if (m_disasmFamily == XBinary::DMFAMILY_ARM) {
                 result.sMnemonic = tr("Invalid opcode");
-                result.nSize = 2;
+                // A32 has a fixed 4-byte instruction width. DMFAMILY_ARM only ever means DM_ARM_LE/DM_ARM_BE
+                // (Thumb maps to a different family), so advancing by 2 would desync onto a mid-word boundary.
+                result.nSize = 4;
             } else if (m_disasmFamily == XBinary::DMFAMILY_ARM64) {
                 result.sMnemonic = tr("Invalid opcode");
                 result.nSize = 4;

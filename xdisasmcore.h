@@ -117,6 +117,8 @@ public:
     XOptions::COLOR_RECORD getOpcodeColor(quint32 nOpcode);
 
 private:
+    void rebuildColors();
+
     XOptions *m_pOptions;
     XBinary::DM m_disasmMode;
     XBinary::DMFAMILY m_disasmFamily;

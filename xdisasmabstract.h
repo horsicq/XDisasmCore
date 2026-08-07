@@ -36,6 +36,7 @@ public:
         qint64 nMaxSize;
         qint32 nCurrentCount;
         qint64 nCurrentOffset;
+        qint64 nNumberOfFolders;  // 7z backend: folder count carried from UnpackInfo to SubStreamsInfo
     };
 
     enum RELTYPE : quint32 {
@@ -82,18 +83,6 @@ public:
     struct DISASM_OPTIONS {
         bool bIsUppercase;
         bool bNoStrings;
-    };
-
-    enum REGS : quint32 {
-        REGS_UNKNOWN = 0,
-        REGS_GENERAL,
-        REGS_FPU,
-        REGS_XMM,
-        REGS_STACK,
-        REGS_SEGMENT,
-        REGS_FLAGS,
-        REGS_DEBUG,
-        REGS_IP
     };
 
     explicit XDisasmAbstract(QObject *pParent = nullptr);

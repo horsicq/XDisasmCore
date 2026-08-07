@@ -21,6 +21,27 @@
 
 #include "xmacho_commands.h"
 
+// XBinary only provides an unsigned ULEB128 reader. Mach-O bind streams use a signed LEB128 for
+// SET_ADDEND_SLEB, so decode the unsigned magnitude with the shared reader and sign-extend it here.
+static XBinary::PACKED_UINT machoReadSleb128(char *pData, qint64 nSize, qint64 *pnSignedValue)
+{
+    XBinary::PACKED_UINT result = XBinary::_read_uleb128(pData, nSize);
+
+    qint64 nSigned = (qint64)result.nValue;
+
+    if (result.bIsValid && (result.nByteSize > 0)) {
+        const qint32 nBits = result.nByteSize * 7;
+
+        if ((nBits < 64) && (result.nValue & ((quint64)1 << (nBits - 1)))) {
+            nSigned |= -((qint64)1 << nBits);  // sign bit set -> sign-extend to 64 bits
+        }
+    }
+
+    *pnSignedValue = nSigned;
+
+    return result;
+}
+
 XMachO_Commands::XMachO_Commands(XBinary::DM disasmMode, QObject *pParent) : XDisasmAbstract(pParent)
 {
     m_disasmMode = disasmMode;
@@ -79,14 +100,33 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
         while (!(state.bIsStop) && XBinary::isPdStructNotCanceled(pPdStruct)) {
             quint64 nTerminalSize = _handleULEB128(&listResult, pData, &state, disasmOptions, "TERMINAL_SIZE");
 
+            // The terminal payload occupies exactly nTerminalSize bytes. Regular exports store FLAGS +
+            // SYMBOL_OFFSET, but re-export and stub-and-resolver kinds carry extra bytes. Bound the payload
+            // by its declared size so CHILD_COUNT is always read from the correct offset regardless of kind.
+            const qint64 nTermPayloadStart = state.nCurrentOffset;
+
             if (nTerminalSize > 0) {
                 _handleULEB128(&listResult, pData, &state, disasmOptions, "FLAGS");
                 _handleULEB128(&listResult, pData, &state, disasmOptions, "SYMBOL_OFFSET");
+
+                if (!state.bIsStop) {
+                    const qint64 nTermPayloadEnd = nTermPayloadStart + (qint64)nTerminalSize;
+
+                    if ((nTermPayloadEnd >= nTermPayloadStart) && (nTermPayloadEnd <= state.nMaxSize)) {
+                        state.nCurrentOffset = nTermPayloadEnd;  // skip any unparsed terminal bytes
+                    } else {
+                        state.bIsStop = true;
+                    }
+                }
             }
 
-            quint64 nChildCount = _handleULEB128(&listResult, pData, &state, disasmOptions, "CHILD_COUNT");
+            quint64 nChildCount = 0;
 
-            for (quint64 i = 0; i < nChildCount; i++) {
+            if (!state.bIsStop) {
+                nChildCount = _handleULEB128(&listResult, pData, &state, disasmOptions, "CHILD_COUNT");
+            }
+
+            for (quint64 i = 0; (i < nChildCount) && (!state.bIsStop); i++) {
                 _handleAnsiString(&listResult, pData, &state, disasmOptions, "NODE_LABEL");
                 _handleULEB128(&listResult, pData, &state, disasmOptions, "NODE_OFFSET");
             }
@@ -97,12 +137,18 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
         }
     } else if ((m_disasmMode == XBinary::DM_CUSTOM_MACH_REBASE) || (m_disasmMode == XBinary::DM_CUSTOM_MACH_BIND) || (m_disasmMode == XBinary::DM_CUSTOM_MACH_WEAK)) {
         while (!(state.bIsStop)) {
+            if (state.nCurrentOffset >= state.nMaxSize) {
+                state.bIsStop = true;
+                break;
+            }
+
             quint8 nOpcode = XBinary::_read_uint8(pData + state.nCurrentOffset);
 
             bool bString = false;
             bool bUleb1 = false;
             bool bUleb2 = false;
             bool bImm = false;
+            bool bSleb1 = false;
 
             QString sMnemonic;
 
@@ -174,7 +220,7 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
                         break;
                     case XMACH_DEF::S_BIND_OPCODE_SET_ADDEND_SLEB:
                         sMnemonic = QString("SET_ADDEND_SLEB");
-                        bUleb1 = true;
+                        bSleb1 = true;  // signed LEB128, not unsigned
                         break;
                     case XMACH_DEF::S_BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB:
                         sMnemonic = QString("SET_SEGMENT_AND_OFFSET_ULEB");
@@ -230,11 +276,18 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
 
             if (!state.bIsStop) {
                 if (bString) {
-                    qint64 nMaxSize = qMin(state.nMaxSize - state.nCurrentOffset + nOpcodeSize, (qint64)256);
-                    QString _sString = XBinary::_read_ansiString(pData + state.nCurrentOffset + nOpcodeSize, nMaxSize - nOpcodeSize);
-                    nOpcodeSize += _sString.size() + 1;
+                    // The readable window is the bytes AFTER the opcode byte: (nMaxSize - nCurrentOffset - nOpcodeSize).
+                    // The previous form added nOpcodeSize instead of subtracting it, over-reading the buffer by nOpcodeSize.
+                    qint64 nStrMax = qMin(state.nMaxSize - state.nCurrentOffset - nOpcodeSize, (qint64)256);
 
-                    sString = XBinary::appendText(sString, _sString, ", ");
+                    if (nStrMax > 0) {
+                        QString _sString = XBinary::_read_ansiString(pData + state.nCurrentOffset + nOpcodeSize, (qint32)nStrMax);
+                        nOpcodeSize += _sString.size() + 1;
+
+                        sString = XBinary::appendText(sString, _sString, ", ");
+                    } else {
+                        state.bIsStop = true;
+                    }
                 }
             }
 
@@ -245,6 +298,29 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
                     if (puTag1.bIsValid) {
                         sString = XBinary::appendText(sString, QString::number(puTag1.nValue, 16), ", ");
                         nOpcodeSize += puTag1.nByteSize;
+                    } else {
+                        state.bIsStop = true;
+                    }
+                }
+            }
+
+            if (!state.bIsStop) {
+                if (bSleb1) {
+                    qint64 nSignedValue = 0;
+                    XBinary::PACKED_UINT puSleb =
+                        machoReadSleb128(pData + state.nCurrentOffset + nOpcodeSize, state.nMaxSize - state.nCurrentOffset - nOpcodeSize, &nSignedValue);
+
+                    if (puSleb.bIsValid) {
+                        QString sNum;
+
+                        if (nSignedValue < 0) {
+                            sNum = QString("-%1").arg(QString::number(-nSignedValue, 16));
+                        } else {
+                            sNum = QString::number(nSignedValue, 16);
+                        }
+
+                        sString = XBinary::appendText(sString, sNum, ", ");
+                        nOpcodeSize += puSleb.nByteSize;
                     } else {
                         state.bIsStop = true;
                     }
@@ -268,13 +344,15 @@ QList<XDisasmAbstract::DISASM_RESULT> XMachO_Commands::_disasm(char *pData, qint
                 _addDisasmResult(&listResult, state.nAddress + state.nCurrentOffset, nOpcodeSize, sMnemonic, sString, &state, disasmOptions);
             }
 
-            // if (nOpcode == 0) {
-            //     state.bIsStop = true;
-            // }
+            // 0x00 is REBASE_OPCODE_DONE / BIND_OPCODE_DONE and terminates the stream. Stop after emitting the
+            // DONE record so trailing padding is not decoded into a run of spurious DONE instructions.
+            if (nOpcode == 0) {
+                state.bIsStop = true;
+            }
         }
-    } else {
-        _addDisasmResult(&listResult, nAddress, nDataSize, "ARRAY", "TST", &state, disasmOptions);
     }
+    // Any other mode is not handled by this backend; return an empty list rather than a fabricated
+    // "ARRAY TST" record. (XDisasmCore::setMode only routes the four custom Mach-O modes here.)
 
     return listResult;
 }

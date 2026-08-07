@@ -82,10 +82,32 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                 _handleTag(pListResults, pData, XSevenZip::k7zIdFolder, pState, disasmOptions);
                 _handleTag(pListResults, pData, XSevenZip::k7zIdEnd, pState, disasmOptions);
             } else if (puTag.nValue == XSevenZip::k7zIdSubStreamsInfo) {
+                // Default (no explicit kNumUnpackStream): one substream per folder.
+                quint64 nTotalSubStreams = (pState->nNumberOfFolders > 0) ? (quint64)pState->nNumberOfFolders : 0;
+                quint64 nFoldersWithStreams = nTotalSubStreams;
+
                 while (!(pState->bIsStop)) {
                     XBinary::PACKED_UINT puExtra = XBinary::_read_packedNumber(pData + pState->nCurrentOffset, pState->nMaxSize - pState->nCurrentOffset);
                     if (puExtra.bIsValid) {
-                        if (puExtra.nValue == XSevenZip::k7zIdCRC) {
+                        if (puExtra.nValue == XSevenZip::k7zIdNumUnpackStream) {
+                            _addTagId(pListResults, puExtra.nValue, XSevenZip::k7zIdNumUnpackStream, pState, disasmOptions);
+                            nTotalSubStreams = 0;
+                            nFoldersWithStreams = 0;
+                            for (qint64 i = 0; (i < pState->nNumberOfFolders) && (!(pState->bIsStop)); i++) {
+                                quint64 nNum = _handleNumber(pListResults, pData, pState, disasmOptions);  // NumUnpackStreamsInFolder
+                                nTotalSubStreams += nNum;
+                                if (nNum > 0) {
+                                    nFoldersWithStreams++;
+                                }
+                            }
+                        } else if (puExtra.nValue == XSevenZip::k7zIdSize) {
+                            _addTagId(pListResults, puExtra.nValue, XSevenZip::k7zIdSize, pState, disasmOptions);
+                            // A size is stored for every substream except the last of each non-empty folder (derived).
+                            quint64 nSizeCount = (nTotalSubStreams > nFoldersWithStreams) ? (nTotalSubStreams - nFoldersWithStreams) : 0;
+                            for (quint64 i = 0; (i < nSizeCount) && (!(pState->bIsStop)); i++) {
+                                _handleNumber(pListResults, pData, pState, disasmOptions);  // Size, NUMBER
+                            }
+                        } else if (puExtra.nValue == XSevenZip::k7zIdCRC) {
                             // TODO mb create a new if
                             _addTagId(pListResults, puExtra.nValue, XSevenZip::k7zIdCRC, pState, disasmOptions);
                             quint64 nCRCCount = _handleNumber(pListResults, pData, pState, disasmOptions);  // Count of CRC
@@ -107,20 +129,55 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                 }
             } else if (puTag.nValue == XSevenZip::k7zIdFolder) {
                 quint64 nNumberOfFolders = _handleNumber(pListResults, pData, pState, disasmOptions);  // Number of Folders
+                pState->nNumberOfFolders = (qint64)nNumberOfFolders;                                   // carried to SubStreamsInfo
                 quint8 nExt = _handleByte(pListResults, pData, pState, disasmOptions);                 // External
+
+                quint64 nTotalOutStreamsAllFolders = 0;
+
                 if (nExt == 0) {
-                    _handleNumber(pListResults, pData, pState, disasmOptions);               // Number of Coders, NUMBER
-                    quint8 nFlag = _handleByte(pListResults, pData, pState, disasmOptions);  // Flag
-                    qint32 nCodecSize = nFlag & 0x0F;
-                    bool bIsComplex = (nFlag & 0x10) != 0;
-                    bool bHasAttr = (nFlag & 0x20) != 0;
-                    _handleArray(pListResults, pData, nCodecSize, pState, disasmOptions);
-                    if (bIsComplex) {
-                        // TODO
-                    }
-                    if (bHasAttr) {
-                        quint64 nPropertySize = _handleNumber(pListResults, pData, pState, disasmOptions);  // PropertiesSize
-                        _handleArray(pListResults, pData, nPropertySize, pState, disasmOptions);
+                    for (quint64 nFolder = 0; (nFolder < nNumberOfFolders) && (!(pState->bIsStop)); nFolder++) {
+                        quint64 nNumberOfCoders = _handleNumber(pListResults, pData, pState, disasmOptions);  // Number of Coders, NUMBER
+
+                        quint64 nTotalInStreams = 0;
+                        quint64 nTotalOutStreams = 0;
+
+                        for (quint64 nCoder = 0; (nCoder < nNumberOfCoders) && (!(pState->bIsStop)); nCoder++) {
+                            quint8 nFlag = _handleByte(pListResults, pData, pState, disasmOptions);  // Flag
+                            qint32 nCodecSize = nFlag & 0x0F;
+                            bool bIsComplex = (nFlag & 0x10) != 0;
+                            bool bHasAttr = (nFlag & 0x20) != 0;
+                            _handleArray(pListResults, pData, nCodecSize, pState, disasmOptions);  // CodecId
+
+                            if (bIsComplex) {
+                                nTotalInStreams += _handleNumber(pListResults, pData, pState, disasmOptions);   // NumInStreams
+                                nTotalOutStreams += _handleNumber(pListResults, pData, pState, disasmOptions);  // NumOutStreams
+                            } else {
+                                nTotalInStreams += 1;
+                                nTotalOutStreams += 1;
+                            }
+
+                            if (bHasAttr) {
+                                quint64 nPropertySize = _handleNumber(pListResults, pData, pState, disasmOptions);  // PropertiesSize
+                                _handleArray(pListResults, pData, nPropertySize, pState, disasmOptions);            // Properties
+                            }
+                        }
+
+                        // BindPairs: (total out-streams - 1) pairs of (InIndex, OutIndex).
+                        quint64 nNumBindPairs = (nTotalOutStreams > 0) ? (nTotalOutStreams - 1) : 0;
+                        for (quint64 i = 0; (i < nNumBindPairs) && (!(pState->bIsStop)); i++) {
+                            _handleNumber(pListResults, pData, pState, disasmOptions);  // InIndex
+                            _handleNumber(pListResults, pData, pState, disasmOptions);  // OutIndex
+                        }
+
+                        // PackedStreams: an explicit index list is present only when more than one remains.
+                        quint64 nNumPackedStreams = (nTotalInStreams >= nNumBindPairs) ? (nTotalInStreams - nNumBindPairs) : 0;
+                        if (nNumPackedStreams > 1) {
+                            for (quint64 i = 0; (i < nNumPackedStreams) && (!(pState->bIsStop)); i++) {
+                                _handleNumber(pListResults, pData, pState, disasmOptions);  // Index
+                            }
+                        }
+
+                        nTotalOutStreamsAllFolders += nTotalOutStreams;
                     }
                 } else if (nExt == 1) {
                     _handleNumber(pListResults, pData, pState, disasmOptions);  // Data Stream Index, NUMBER
@@ -131,7 +188,8 @@ void X7Zip_Properties::_handleTag(QList<DISASM_RESULT> *pListResults, char *pDat
                     if (puExtra.bIsValid) {
                         if (puExtra.nValue == XSevenZip::k7zIdCodersUnpackSize) {
                             _addTagId(pListResults, puExtra.nValue, XSevenZip::k7zIdCodersUnpackSize, pState, disasmOptions);
-                            for (quint64 i = 0; (i < nNumberOfFolders) && (!(pState->bIsStop)); i++) {
+                            // One unpack size per output stream, summed over every folder.
+                            for (quint64 i = 0; (i < nTotalOutStreamsAllFolders) && (!(pState->bIsStop)); i++) {
                                 _handleNumber(pListResults, pData, pState, disasmOptions);  // Unpacksize, NUMBER
                             }
                         } else if (puExtra.nValue == XSevenZip::k7zIdCRC) {
