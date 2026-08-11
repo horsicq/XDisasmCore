@@ -55,6 +55,11 @@ public:
         bool bIsConst;
     };
 
+    struct DATA {
+        QString sString;
+        XOptions::COLOR_RECORD colorRecord;
+    };
+
     enum OG {
         OG_UNKNOWN = 0,
         OG_ARROWS,
@@ -105,6 +110,7 @@ public:
     static QString replaceWildChar(const QString &sString, qint32 nOffset, qint32 nSize, QChar cWild);  // Move to XBinary
 
     QString getNumberString(qint64 nValue);
+    QList<XDisasmCore::DATA> convertDisasmResult(const XDisasmAbstract::DISASM_RESULT &disasmResult);
 
     XOptions::COLOR_RECORD getColorRecord(OG og);
     static QMap<OG, XOptions::COLOR_RECORD> getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode);
@@ -118,6 +124,7 @@ public:
 
 private:
     void rebuildColors();
+    XOptions::COLOR_RECORD getOperandColor(const QString &sOperand);
 
     XOptions *m_pOptions;
     XBinary::DM m_disasmMode;
