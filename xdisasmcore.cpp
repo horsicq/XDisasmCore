@@ -300,28 +300,26 @@ XOptions::COLOR_RECORD XDisasmCore::getOperandColor(const QString &sOperand)
     return result;
 }
 
-QList<XDisasmCore::DATA> XDisasmCore::convertDisasmResult(const XDisasmAbstract::DISASM_RESULT &disasmResult)
+static void _disasmAddPart(XColorString *pResult, const QString &sString, const XOptions::COLOR_RECORD &colorRecord)
 {
-    QList<XDisasmCore::DATA> listResult;
+    if (!sString.isEmpty()) {
+        pResult->addPart(sString, colorRecord.sColorMain, colorRecord.sColorBackground);
+    }
+}
+
+XColorString XDisasmCore::convertDisasmResult(const XDisasmAbstract::DISASM_RESULT &disasmResult)
+{
+    XColorString result;
     XOptions::COLOR_RECORD emptyColorRecord = {};
     XOptions::COLOR_RECORD opcodeColorRecord = getOpcodeColor(disasmResult.nOpcode);
 
-    auto appendData = [&listResult](const QString &sString, const XOptions::COLOR_RECORD &colorRecord) {
-        if (!sString.isEmpty()) {
-            XDisasmCore::DATA data = {};
-            data.sString = sString;
-            data.colorRecord = colorRecord;
-            listResult.append(data);
-        }
-    };
-
-    appendData(disasmResult.sMnemonic, opcodeColorRecord);
+    _disasmAddPart(&result, disasmResult.sMnemonic, opcodeColorRecord);
 
     if (!disasmResult.sOperands.isEmpty()) {
-        appendData(" ", emptyColorRecord);
+        _disasmAddPart(&result, " ", emptyColorRecord);
 
         if (XDisasmAbstract::isNopOpcode(m_disasmFamily, disasmResult.nOpcode)) {
-            appendData(disasmResult.sOperands, opcodeColorRecord);
+            _disasmAddPart(&result, disasmResult.sOperands, opcodeColorRecord);
         } else {
             QString sCurrent;
             const QString sSeparators = ",[]+-*(): ";
@@ -332,44 +330,31 @@ QList<XDisasmCore::DATA> XDisasmCore::convertDisasmResult(const XDisasmAbstract:
 
                 if (sSeparators.contains(ch)) {
                     if (!sCurrent.isEmpty()) {
-                        appendData(sCurrent, getOperandColor(sCurrent));
+                        _disasmAddPart(&result, sCurrent, getOperandColor(sCurrent));
                         sCurrent.clear();
                     }
 
-                    appendData(QString(ch), emptyColorRecord);
+                    _disasmAddPart(&result, QString(ch), emptyColorRecord);
                 } else {
                     sCurrent.append(ch);
                 }
             }
 
             if (!sCurrent.isEmpty()) {
-                appendData(sCurrent, getOperandColor(sCurrent));
+                _disasmAddPart(&result, sCurrent, getOperandColor(sCurrent));
             }
         }
     }
 
-    return listResult;
+    return result;
 }
 
 #ifdef QT_GUI_LIB
 void XDisasmCore::drawDisasmText(QPainter *pPainter, QRectF rectText, const XDisasmAbstract::DISASM_RESULT &disasmResult)
 {
     if (pPainter) {
-        pPainter->save();
-
-        QList<XDisasmCore::DATA> listData = convertDisasmResult(disasmResult);
-        qint32 nNumberOfRecords = listData.count();
-
-        for (qint32 i = 0; i < nNumberOfRecords; i++) {
-            QRectF rectCurrent = rectText;
-            qreal dWidth = QFontMetrics(pPainter->font()).size(Qt::TextSingleLine, listData.at(i).sString).width();
-            rectCurrent.setWidth(dWidth);
-
-            drawColorText(pPainter, rectCurrent, listData.at(i).sString, listData.at(i).colorRecord);
-            rectText.setLeft(rectText.left() + dWidth);
-        }
-
-        pPainter->restore();
+        XColorString colorString = convertDisasmResult(disasmResult);
+        colorString.draw(pPainter, rectText, m_qTextOptions);
     }
 }
 #endif
