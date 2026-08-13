@@ -23,6 +23,7 @@
 #define XDISASMCORE_H
 
 #include "xoptions.h"
+#include "xcolorstring.h"
 #include "xcapstone.h"
 #include "xdisasmabstract.h"
 #include "Modules/capstone_bridge.h"
@@ -53,11 +54,6 @@ public:
         qint32 nImmOffset;
         qint32 nImmSize;
         bool bIsConst;
-    };
-
-    struct DATA {
-        QString sString;
-        XOptions::COLOR_RECORD colorRecord;
     };
 
     enum OG {
@@ -110,7 +106,7 @@ public:
     static QString replaceWildChar(const QString &sString, qint32 nOffset, qint32 nSize, QChar cWild);  // Move to XBinary
 
     QString getNumberString(qint64 nValue);
-    QList<XDisasmCore::DATA> convertDisasmResult(const XDisasmAbstract::DISASM_RESULT &disasmResult);
+    XColorString convertDisasmResult(const XDisasmAbstract::DISASM_RESULT &disasmResult);
 
     XOptions::COLOR_RECORD getColorRecord(OG og);
     static QMap<OG, XOptions::COLOR_RECORD> getColorRecordsMap(XOptions *pOptions, XBinary::DM disasmMode);
